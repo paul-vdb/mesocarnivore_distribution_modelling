@@ -41,7 +41,7 @@ The intent is to answer these questions for all mesocarnivores. Models will be w
 
 ## What will I be asked to do?
 
-You will be sent a link to an online form where you will be asked to attach an excel or csv file with your records. In the form you will also find different templates for various data types. Please select the one that best matches your data. Alternatively, you can upload your data in its current format as long as each row contains the following information:
+If you want to contribute, please complete this online form where you will be asked to attach an excel or csv file with your records. We encourage you to use one of [different templates for various data types](https://github.com/cindyhurtado/mesocarnivore_distribution_modelling/tree/main/Data%20contributors%20templates). Please select the one that best matches your data. Alternatively, you can upload your data in its current format as long as each row contains the following information:
 
 •	Project name: Unique ID that identifies the project. 
 
