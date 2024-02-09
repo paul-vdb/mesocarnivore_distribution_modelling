@@ -8,6 +8,7 @@
 #.libPaths('C:/Users/CHURTADO/AppData/R') # this is a new path
 #.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
 
+
 library(rjags)
 library(jagsUI)
 

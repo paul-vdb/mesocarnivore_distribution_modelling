@@ -8,10 +8,10 @@ library(farver)
 library(ggplot2)
 library(rmapshaper)
 library(stars)
-#
+library(tidyterra)
 require(sf)
 
-#1. Read and plot layers
+#1. Read and plot layers ####
 
 setwd("C:/LocalR")
 populations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Fisher_population_units")
@@ -48,7 +48,7 @@ plot3 = ggplot() +
   geom_sf(data = Interdigit, color= 'yellow')
 plot3
 
-#2. simplify shape file of  subpopulations 
+#2. simplify shape file of  subpopulations ####
 
 library(rmapshaper)
 subpop <- ms_simplify(subpopulations, keep = 0.001,
@@ -61,11 +61,12 @@ subpop_plot = ggplot() +
   coord_sf(crs = 3005) #3005 albers
 subpop_plot
 
-#3. Remove boreal population
+#3. Select desired population or Remove boreal population
 
-subpop2 <- subpop |> dplyr::filter(Subpop != "Boreal")
+subpop2 <- subpop |> dplyr::filter(Subpop == "Cariboo")
+#subpop2 <- subpop |> dplyr::filter(Subpop != "Boreal")
 
-#3. convert to raster 
+#3. convert to raster, 3km (res=3000) is too small for area ####
 
 template = rast(vect(subpop),res=3000)
 
@@ -82,7 +83,10 @@ rasterplot
 
 #4. Clip extent to columbian area, can also dissolve 3 subpopulations and clip extent with that 
 
-subpop_raster_cp <- crop(subpop_raster, columbian_area, mask= T)
+subpop_raster_cp <- terra::mask(subpop_raster, columbian_area)
+subpop_raster_cp <- trim(subpop_raster_cp)
+subpop_raster_cp 
+writeRaster(subpop_raster_cp,'Cariboo_3k.tif')
 
 rasterplot2 = ggplot() +
   geom_spatraster(data = subpop_raster_cp)+
@@ -92,8 +96,8 @@ rasterplot2 = ggplot() +
   geom_sf(data = Camera_data_sf, color = 'lightgreen') +
   geom_sf(data = DNA_data_sf, color= 'lightblue', alpha=0.1) +
   geom_sf(data = MDM_academics_sf, color= 'lightgreen', alpha=0.1) +
-  geom_sf(data = Academic_sp_fisher_sf, color= 'black', alpha=0.1)+
-  geom_sf(data = CAM_sp_map_fisher_sf, color= 'blue', alpha=0.1)+
+  #geom_sf(data = Academic_sp_fisher_sf, color= 'black', alpha=0.1)+
+  #geom_sf(data = CAM_sp_map_fisher_sf, color= 'blue', alpha=0.1)+
   geom_sf(data = df_fisher_sf, color= 'pink') +
   coord_sf(crs = 3005)  
 rasterplot2 

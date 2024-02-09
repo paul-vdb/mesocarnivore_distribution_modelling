@@ -78,32 +78,27 @@ sites_cariboo <- bind_rows(academics_cariboo, DNA_cariboo) # no data on cameras
 
 #3. Extract coordinates in Albers 
 
-Ssites_cariboo<-  do.call(rbind, st_geometry(sites_cariboo)) %>%  as_tibble()
-Ssites_cariboo2 <- cbind(st_drop_geometry(sites_cariboo), Ssites_cariboo)
-Ssites_cariboo2 <- rename(Ssites_cariboo2, c(Long= V1, Lat= V2))
+Ssites_cariboo_albers<-  do.call(rbind, st_geometry(sites_cariboo)) %>%  as_tibble()
+Ssites_cariboo2 <- cbind(st_drop_geometry(sites_cariboo), Ssites_cariboo_albers)
+#Ssites_cariboo2 <- rename(Ssites_cariboo2, c(Long= V1, Lat= V2))
+coord.scale <- 1000
+traps.scale <- as.data.frame(Ssites_cariboo_albers/coord.scale)
+
+# NEED TO SCALE COORDINATES TO REDUCE THE AREA IN THE STATE SPACE ## 
 
 #define statespace, using cariboo subpopulation data 
 
 library(scales)
-coordinates <- select(Ssites_cariboo2, Long, Lat)
-plot(coordinates, xlab='Long', ylab='Lat', frame=FALSE, las=1, pch=10, col='#002A64FF', asp=1)
-summary(coordinates)
-
-#Long (X)             Lat (y)        
-#Min.   :1259274   Min.   :634297  
-#1st Qu.:1291064   1st Qu.:712545  
-#Median :1307438   Median :731797  
-#Mean   :1312301   Mean   :732582  
-#3rd Qu.:1332566   3rd Qu.:752454  
-#Max.   :1400219   Max.   :788662 
-
+#coordinates <- select(Ssites_cariboo2, Long, Lat) ## scaled coordinates
+plot(traps.scale, xlab='V1', ylab='V2', frame=FALSE, las=1, pch=10, col='#002A64FF', asp=1)
+summary(traps.scale)
 
 # Define limits of the state-space and add it to the plot
-xlim <- c(1250000, 1405000)
-ylim <- c(630000 , 800000 )
 
-#xlim <- c(0,100)
-#ylim <- c(0,100)
+xlim <- c(min(traps.scale$V1)+2, max(traps.scale$V1)+2)
+ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
+
+
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
@@ -111,12 +106,12 @@ M <- 300 #
 psi <- 0.33 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
-sigma <- 5 #scale parameter 5km approximate movement of bears
+sigma <- 5 #scale parameter 5km approximate movement of bears 
 
 #sampling 
 p0.s<-0.5 #detection probability SCR
-p0.o<-0.2 #Detection probability PA, generally lower than SCR but can use higher too
-K <- 10 #sampling occasions/ biweekly? 21 days in our sites
+p0.o<-0.5 #Detection probability PA, generally lower than SCR but can use higher too
+K <- 4 #sampling occasions/ biweekly? 21 days in our sites
 
 T<-4 # primary sampling periods
 
@@ -128,23 +123,22 @@ J.s<-1761 # placing 1761 hair traps on a grid of
 #J.o <- 50
 J.o<-158 # placing 158 camera traps on a grid of 
 
-co <- seq((xlim[1]+7*sigma), (xlim[2]-7*sigma), length=sqrt(J.s)) #starting points for the grid
+#co <- seq((xlim[1]+2*sigma), (xlim[2]-2*sigma), length=sqrt(J.s)) #starting points for the grid
 
-X.s <- cbind(rep(co, each=length(co)), rep(co, times=length(co)))# 5 X 4 grid with spacing of 7.5km or 1.5 X sigma.  
+#X.s <- cbind(rep(co, each=length(co)), rep(co, times=length(co)))# 5 X 4 grid with spacing of 7.5km or 1.5 X sigma.  
 
-X.o <-cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)))
+#X.o <-cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)))
 
-#X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA")
-#X.s <- select(X.s, Long, Lat)
-#X.s <- as.matrix(X.s, dim = c(dim(X.s)[1], 2))
-#X.s <- unname(X.s) # removed this to see if it helps with error
+X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA")
+X.s <- select(X.s, V1, V2)
+X.s <- as.data.frame(X.s/coord.scale)
+X.s <- as.matrix(X.s, dim = c(dim(X.s)[1], 2))
+X.s <- unname(X.s) # removed this to see if it helps with error
 
-#cbind(rep(co, each=length(co)), rep(co, times=length(co)))# 5 X 4 grid with spacing of 7.5km or 1.5 X sigma.  
-
-#X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM")
-#X.o <- select(X.o, Long, Lat)
-#X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
-#X.o <- unname(X.o)
+X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM")
+X.o <- select(X.o, V1, V2)
+X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
+X.o <- unname(X.o)
 
 #cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma))) # 50 random points within the grid. 2*sigma determines what is not included in the sampling area. here its 10 and 90 are the limits, excluding 20% of cells. Thus the sampling area is 64000
 
