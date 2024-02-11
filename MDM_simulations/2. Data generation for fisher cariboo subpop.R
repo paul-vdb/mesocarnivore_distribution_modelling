@@ -80,11 +80,11 @@ sites_cariboo <- bind_rows(academics_cariboo, DNA_cariboo) # no data on cameras
 
 Ssites_cariboo_albers<-  do.call(rbind, st_geometry(sites_cariboo)) %>%  as_tibble()
 Ssites_cariboo2 <- cbind(st_drop_geometry(sites_cariboo), Ssites_cariboo_albers)
-#Ssites_cariboo2 <- rename(Ssites_cariboo2, c(Long= V1, Lat= V2))
+#Ssites_cariboo2 <- rename(Ssites_cariboo2, c(Long= V1, Lat= V2))coord.scale
 coord.scale <- 1000
 traps.scale <- as.data.frame(Ssites_cariboo_albers/coord.scale)
 
-# NEED TO SCALE COORDINATES TO REDUCE THE AREA IN THE STATE SPACE ## 
+# NEED TO SCALE COORDINATES TO REDUCE THE AREA IN THE STATE SPACE, plot X.s and Xo to make sure traps have the same scale ## 
 
 #define statespace, using cariboo subpopulation data 
 
@@ -98,6 +98,9 @@ summary(traps.scale)
 xlim <- c(min(traps.scale$V1)+2, max(traps.scale$V1)+2)
 ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 
+#xlim <- c(0,100)
+#ylim <- c(0,100)
+
 
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
@@ -109,9 +112,9 @@ phi <- 0.8 #survival probability from t-1 to t.
 sigma <- 5 #scale parameter 5km approximate movement of bears 
 
 #sampling 
-p0.s<-0.5 #detection probability SCR
-p0.o<-0.5 #Detection probability PA, generally lower than SCR but can use higher too
-K <- 4 #sampling occasions/ biweekly? 21 days in our sites
+p0.s<-0.2 #detection probability SCR
+p0.o<-0.2 #Detection probability PA, generally lower than SCR but can use higher too
+K <- 10 #sampling occasions/ biweekly? 21 days in our sites
 
 T<-4 # primary sampling periods
 
@@ -137,6 +140,7 @@ X.s <- unname(X.s) # removed this to see if it helps with error
 
 X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM")
 X.o <- select(X.o, V1, V2)
+X.o <- as.data.frame(X.o/coord.scale)
 X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
 X.o <- unname(X.o)
 
@@ -201,7 +205,7 @@ simdata <- function(M, psi, gamma, phi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 1
+nsims <- 10
 stub <- "test_IM"
 for(i in 1:nsims) {
   obj.i <- paste("dat.", stub, "_",i, sep="")

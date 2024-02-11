@@ -8,6 +8,8 @@
 #.libPaths('C:/Users/CHURTADO/AppData/R') # this is a new path
 #.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
 
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
+
 
 library(rjags)
 library(jagsUI)
@@ -61,7 +63,7 @@ for(i in 1:nsims){
   )
   out <-
     jags(
-      "MarginalModel_closed.JAG",
+      "margMulti_IPM.JAG",
       data = jdat.i,
       inits = init_simple,
       parallel = TRUE, n.cores= 18,
@@ -82,10 +84,12 @@ for(i in 1:nsims){
 ##########################
 ### fit marginal open model
 ##########################
+start.time <- Sys.time()
+
 library("jagsUI")
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1:(5 * (dim(y)[1])), ] <- 1
+  zi[1: (4 *(dim(y)[1])), ] <- 1 # deleted 5* in 1:5*(dim(y)[1]))
   sii <- apply(y, c(1, 2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -98,7 +102,7 @@ init_simple <- function() {
     s = si,
     gamma = 0.2,
     phi = 0.8,
-    p0.S = 0.05,
+    p0.S = 0.2,
     p0.O = 0.2,
     sigma = 5
   )
@@ -109,7 +113,7 @@ pars <-
 for (i in 1:nsims) {
   name.i <- paste("dat.", stub, "_", i, sep = "")
   obj.i <- get(name.i)
-  out.i <- paste("out.", stub, "_", i, sep = "")
+  out.i <- paste("open.cariboo", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for all T
   dim.y <- dim(y)
   y.orig <-
@@ -140,7 +144,7 @@ for (i in 1:nsims) {
       "margMulti_IPM.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 18,
+      parallel = TRUE, n.cores= 23,
       n.chains = 3,
       n.burnin = 2000,
       n.adapt = 100,
@@ -151,5 +155,15 @@ for (i in 1:nsims) {
   save(list = out.i, file = paste(out.i, ".gzip", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
+
+run_with_time <- function() {
+  cat(date())
+  rstudioapi::sendToConsole(
+    unclass(rstudioapi::getSourceEditorContext()$selection)[[1]]$text)
+}
+
+end.time <- Sys.time()
+time.taken <- round(end.time - start.time,2)
+time.taken
 
 jags.View(out.test_IM_1)
