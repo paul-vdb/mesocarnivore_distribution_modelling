@@ -84,6 +84,7 @@ for(i in 1:nsims){
 ##########################
 ### fit marginal open model
 ##########################
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 start.time <- Sys.time()
 
 library("jagsUI")
@@ -144,7 +145,7 @@ for (i in 1:nsims) {
       "margMulti_IPM.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 23,
+      parallel = TRUE, n.cores= 18,
       n.chains = 3,
       n.burnin = 2000,
       n.adapt = 100,
@@ -154,12 +155,6 @@ for (i in 1:nsims) {
   assign(out.i, out)
   save(list = out.i, file = paste(out.i, ".gzip", sep = ""))
   rm(name.i, obj.i, out.i, out)
-}
-
-run_with_time <- function() {
-  cat(date())
-  rstudioapi::sendToConsole(
-    unclass(rstudioapi::getSourceEditorContext()$selection)[[1]]$text)
 }
 
 end.time <- Sys.time()
