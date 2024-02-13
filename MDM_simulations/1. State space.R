@@ -9,7 +9,7 @@ library(ggplot2)
 library(rmapshaper)
 library(stars)
 library(tidyterra)
-require(sf)
+library(ggmap)
 
 #1. Read and plot layers ####
 
@@ -39,9 +39,14 @@ plot1
 
 subpop_plot = ggplot() +
   geom_sf(data = bc_bound) +
-  geom_sf(data = subpopulations, aes(fill= Subpop))+
-  geom_sf(data = subpop_bound, color = 'black')
+  geom_sf(data = subpop, aes(fill= Subpop), color=NA)+
+  geom_sf(data = subpop_bound, color = 'black')+
+  geom_sf(data = MDM_academics_sf, color= 'blue', size=0.01)+
+  geom_sf(data = Camera_data_sf, color= 'blue', size=0.01)+
+  geom_sf(data = DNA_data_sf, color= 'yellow', size=0.01)+
+  coord_sf(crs = 3005)
 subpop_plot
+  
 
 plot3 = ggplot() +
   geom_sf(data = bc_bound) +

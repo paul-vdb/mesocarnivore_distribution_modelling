@@ -23,7 +23,6 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 #crslatlong <- "+proj=longlat" 
 #grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
 
-
 #A.  density studies 
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 

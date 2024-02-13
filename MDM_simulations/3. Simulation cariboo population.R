@@ -112,7 +112,7 @@ pars <-
   c("N", "psi", "p0.S", "p0.O", "sigma", "Never", "gamma", "b", "phi")
 
 for (i in 1:nsims) {
-  name.i <- paste("dat.", stub, "_", i, sep = "")
+  name.i <- paste("dat.cariboo", stub, "_", i, sep = "")
   obj.i <- get(name.i)
   out.i <- paste("open.cariboo", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for all T
