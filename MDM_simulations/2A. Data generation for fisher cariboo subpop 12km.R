@@ -253,9 +253,9 @@ simdata <- function(M, psi, gamma, phi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 1
-stub <- "test_IM"
+stub <- "test_IOM"
 for(i in 1:nsims) {
-  obj.i <- paste("dat.", stub, "_",i, sep="")
+  obj.i <- paste("dat.cariboo_", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
