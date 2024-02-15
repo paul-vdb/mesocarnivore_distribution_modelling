@@ -69,7 +69,7 @@ for (i in 1:nsims) {
       n.chains = 3,
       n.burnin = 200,
       n.adapt = 100,
-      n.iter = 500,
+      n.iter = 5000,
       parameters.to.save = pars
     )
   assign(out.i, out)

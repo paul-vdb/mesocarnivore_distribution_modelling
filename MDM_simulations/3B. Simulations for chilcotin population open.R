@@ -21,8 +21,8 @@ init_simple <- function() {
     s = si,
     gamma = 0.2,
     phi = 0.8,
-    p0.S = 0.2,
-    p0.O = 0.2,
+    p0.S = p0.s,
+    p0.O = p0.o,
     sigma = 5
   )
 }

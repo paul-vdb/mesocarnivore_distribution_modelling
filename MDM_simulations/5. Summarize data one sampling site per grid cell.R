@@ -13,27 +13,39 @@ library(dplyr)
 #grid 
 setwd("C:/LocalR")
 meso_grid <- st_read("BC_meso_grid.shp")
-grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
-grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
-columbian_area <- ms_simplify(grid_columbian_sf, keep = 0.01,
+columbian_area <- ms_simplify(grid_columbian, keep = 0.01,
                               keep_shapes = FALSE)
-#grid_columbian_vect <- vect(grid_columbian) # 3005 albers projection
-# change projection 
-#crslatlong <- "+proj=longlat" 
-#grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
 
 #A.  density studies 
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_11-27b.csv") # file with all density studies 
+df <- read_csv("DNA_data_MDB_11-27b.csv") # file with all density 
 df$DATA_TYPE <- "DNA"
-#df <- subset(df, Project_name != "3289")
-df.coords <- dplyr::select(df, x = Longitude_DD, y = Latitude_DD)
-crslatlong <- "+proj=longlat" 
-DNA_data <- vect(df, geom=c("Longitude_DD", "Latitude_DD"), crs=crslatlong) 
-DNA_data_sf <-  sf::st_as_sf(DNA_data, remove= FALSE)
-DNA_data_sf_albers <- st_transform(DNA_data_sf, crs=3005)
+df <-  df %>% drop_na(c(Latitude_DD, Longitude_DD))
+
+DNA_data_sf <-  sf::st_as_sf(df, coords= c('Longitude_DD', 'Latitude_DD'), crs= 4326 ) %>% st_transform( crs=3005)
+
+#only one coordinate per station per grid.
+
+DNA_short <- DNA_data_sf %>% group_by(Project_name, Station_ID) %>% 
+summarise(n = n(), .groups="drop")
+
+bc_bound = bcmaps::bc_bound()
+regs = bcmaps::nr_regions()
+
+ggplot() +
+  geom_sf(data = bc_bound)+
+  geom_sf(data = DNA_data_sf, size= 0.3, color= 'red')+
+  geom_sf(data = DNA_short, size= 0.1)
+
+# Intersect grid with points to obtain geometry of grids 
+
+DNA_grid <- st_intersection(DNA_short, meso_grid)
+
+ggplot() +
+  geom_sf(data = bc_bound)+
+  geom_sf(data = DNA_grid)
 
 #B. Camera studies
 
@@ -42,12 +54,8 @@ setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarni
 
 cam_df <- read_csv("camera_deployments_01-10.csv")
 cam_df$DATA_TYPE <- "CAM"
-cam.coords <- dplyr::select(cam_df, x = Longitude_DD, y = Latitude_DD)
-Camera_data <- vect(cam_df, geom=c("Longitude_DD", "Latitude_DD"), crs=crslatlong) 
-Camera_data_sf <-  sf::st_as_sf(Camera_data)
-plot(Camera_data)
 
-Camera_data_sf_albers <- st_transform(Camera_data_sf, crs=3005)
+Cam_data_sf <-  sf::st_as_sf(cam_df, coords= c('Longitude_DD', 'Latitude_DD'), crs= 4326 ) %>% st_transform( crs=3005)
 
 #C. academics camera studies
 Academics_cam <- read_csv("academics_cam_feb7.csv")
