@@ -103,8 +103,8 @@ init_simple <- function() {
     s = si,
     gamma = 0.2,
     phi = 0.8,
-    p0.S = 0.2,
-    p0.O = 0.2,
+    p0.S = p0.s,
+    p0.O = p0.o,
     sigma = 5
   )
 }
@@ -112,9 +112,9 @@ pars <-
   c("N", "psi", "p0.S", "p0.O", "sigma", "Never", "gamma", "b", "phi")
 
 for (i in 1:nsims) {
-  name.i <- paste("dat.cariboo", stub, "_", i, sep = "")
+  name.i <- paste("dat.cariboo_", stub, "_", i, sep = "")
   obj.i <- get(name.i)
-  out.i <- paste("open.cariboo", stub, "_", i, sep = "")
+  out.i <- paste("open.cariboo_", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for all T
   dim.y <- dim(y)
   y.orig <-
@@ -147,8 +147,8 @@ for (i in 1:nsims) {
       inits = init_simple,
       parallel = TRUE, n.cores= 18,
       n.chains = 3,
-      n.burnin = 2000,
-      n.adapt = 100,
+      n.burnin = 1000,
+      n.adapt = 500,
       n.iter = 5000,
       parameters.to.save = pars
     )
@@ -161,4 +161,4 @@ end.time <- Sys.time()
 time.taken <- round(end.time - start.time,2)
 time.taken
 
-jags.View(out.test_IM_1)
+jags.View(open.cariboo_test_IM_1)
