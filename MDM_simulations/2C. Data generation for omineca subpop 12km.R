@@ -253,8 +253,8 @@ simdata <- function(M, psi, gamma, phi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 10
-stub <- "test_IM_omineca"
+nsims <- 1
+stub <- "test_IOM_omineca"
 for(i in 1:nsims) {
   obj.i <- paste("dat.omineca", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, gamma=gamma, phi=phi,
