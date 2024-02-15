@@ -160,7 +160,7 @@ phi <- 0.8 #survival probability from t-1 to t.
 sigma <- 5 #scale parameter 5km approximate movement of bears 
 
 #sampling 
-p0.s<-0.2 #detection probability SCR
+p0.s<-0.5 #detection probability SCR
 p0.o<-0.2 #Detection probability PA, generally lower than SCR but can use higher too
 K <- 10 #sampling occasions/ biweekly? 21 days in our sites
 
@@ -254,9 +254,13 @@ simdata <- function(M, psi, gamma, phi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 1
+<<<<<<< HEAD
 stub <- "test_IOM_omineca"
+=======
+stub <- "test_IM_omineca"
+>>>>>>> d74b4b9264a663a59fa888b2fb3518437726bf6b
 for(i in 1:nsims) {
-  obj.i <- paste("dat.omineca", stub, "_",i, sep="")
+  obj.i <- paste("dat.omineca_", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
