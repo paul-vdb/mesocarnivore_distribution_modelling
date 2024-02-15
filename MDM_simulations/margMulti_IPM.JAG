@@ -60,7 +60,7 @@ model{
       pn[i,j,4] <- (1-(p.O[i,j,4]*z[i,4]))
     } #j.o
     zi[i] <- (sum(z[i,]) > 0) # Was this bear ever alive?
-    for(t in 2:T) {
+    for(t in 2:T) { 
       mu[i,t-1] <- z[i,t-1]*phi + (1 - a[i,t-1])*b[t-1]
       z[i,t] ~ dbern(mu[i,t-1])
       a[i,t] <- max(z[i,1:t]) # recruited yet?
