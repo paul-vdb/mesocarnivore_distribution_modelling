@@ -254,11 +254,7 @@ simdata <- function(M, psi, gamma, phi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 1
-<<<<<<< HEAD
-stub <- "test_IOM_omineca"
-=======
-stub <- "test_IM_omineca"
->>>>>>> d74b4b9264a663a59fa888b2fb3518437726bf6b
+stub <- "test_IM2"
 for(i in 1:nsims) {
   obj.i <- paste("dat.omineca_", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, gamma=gamma, phi=phi,

@@ -154,7 +154,7 @@ phi <- 0.8 #survival probability from t-1 to t.
 sigma <- 5 #scale parameter 5km approximate movement of bears 
 
 #sampling 
-p0.s<-0.2 #detection probability SCR
+p0.s<-0.5 #detection probability SCR
 p0.o<-0.2 #Detection probability PA, generally lower than SCR but can use higher too
 K <- 10 #sampling occasions/ biweekly? 21 days in our sites
 
