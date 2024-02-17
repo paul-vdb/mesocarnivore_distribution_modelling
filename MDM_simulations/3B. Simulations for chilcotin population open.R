@@ -65,13 +65,13 @@ for (i in 1:nsims) {
       inits = init_simple,
       parallel = TRUE, n.cores= 18,
       n.chains = 3,
-      n.burnin = 2000,
-      n.adapt = 100,
-      n.iter = 5000,
+      n.burnin = 200,
+      n.adapt = 10,
+      n.iter = 500,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, ".gzip", sep = ""))
+  save(list = out.i, file = paste(out.i, "jags.RData", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 

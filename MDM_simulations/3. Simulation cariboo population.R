@@ -153,7 +153,7 @@ for (i in 1:nsims) {
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, ".gzip", sep = ""))
+  save(list = out.i, file = paste(out.i, "5k.RData", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
@@ -161,4 +161,4 @@ end.time <- Sys.time()
 time.taken <- round(end.time - start.time,2)
 time.taken
 
-jags.View(open.cariboo_test_IM_1)
+jags.View(open.cariboo_test_IOM_1)
