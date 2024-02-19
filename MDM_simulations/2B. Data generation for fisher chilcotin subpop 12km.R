@@ -256,7 +256,7 @@ simdata <- function(M, psi, gamma, phi, p0.s,p0.o, sigma,
 nsims <- 1
 stub <- "test_IOM_chilcotin"
 for(i in 1:nsims) {
-  obj.i <- paste("dat.chilcotin", stub, "_",i, sep="")
+  obj.i <- paste("dat.chilcotin_", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #

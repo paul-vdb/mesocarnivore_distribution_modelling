@@ -1,4 +1,3 @@
-
 ##########################
 ### fit marginal open model
 ##########################
@@ -30,9 +29,9 @@ pars <-
   c("N", "psi", "p0.S", "p0.O", "sigma", "Never", "gamma", "b", "phi")
 
 for (i in 1:nsims) {
-  name.i <- paste("dat.chilcotin", stub, "_", i, sep = "")
+  name.i <- paste("dat.chilcotin_", stub, "_", i, sep = "")
   obj.i <- get(name.i)
-  out.i <- paste("open.chilcotin", stub, "_", i, sep = "")
+  out.i <- paste("open.chilcotin_", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for all T
   dim.y <- dim(y)
   y.orig <-
@@ -65,13 +64,13 @@ for (i in 1:nsims) {
       inits = init_simple,
       parallel = TRUE, n.cores= 18,
       n.chains = 3,
-      n.burnin = 200,
-      n.adapt = 10,
-      n.iter = 500,
+      n.burnin = 5000,
+      n.adapt = 2000,
+      n.iter = 50000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "jags.RData", sep = ""))
+  save(list = out.i, file = paste(out.i, "50k.RData", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
@@ -79,4 +78,4 @@ end.time <- Sys.time()
 time.taken <- round(end.time - start.time,2)
 time.taken
 
-jags.View(out.test_IM_1)
+jags.View(open.chilcotin_test_IOM_1)

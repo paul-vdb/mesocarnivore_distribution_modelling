@@ -147,13 +147,13 @@ for (i in 1:nsims) {
       inits = init_simple,
       parallel = TRUE, n.cores= 18,
       n.chains = 3,
-      n.burnin = 1000,
-      n.adapt = 500,
-      n.iter = 5000,
+      n.burnin = 5000,
+      n.adapt = 2000,
+      n.iter = 50000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "5k.RData", sep = ""))
+  save(list = out.i, file = paste(out.i, "50k.RData", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 

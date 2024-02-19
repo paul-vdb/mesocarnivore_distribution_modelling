@@ -1,12 +1,13 @@
 #graphs IM cariboo simulations###
 library(tidyverse)
 library(ggplot2)
-
+library(jagsUI)
 setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 
 #1. Select the model 
 model <- open.cariboo_test_IOM_1
 
+plot(model)
 #2. View model output table 
 jags.View(model)
 
