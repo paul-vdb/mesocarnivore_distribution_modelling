@@ -4,9 +4,14 @@ library(ggplot2)
 library(jagsUI)
 setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 
+# Check if M is enough by looking at N.ever alive output
+# Change p.o and p.s init parameters to 0.05
+# simulate with fisher parameters and lower p.o and p.s
+
+
 #1. Select the model 
 model <- open.cariboo_test_IOM_1
-
+print(model,3)
 plot(model)
 #2. View model output table 
 jags.View(model)
