@@ -1,4 +1,3 @@
-
 ##########################
 ### fit marginal open model
 ##########################
@@ -8,7 +7,7 @@ start.time <- Sys.time()
 library("jagsUI")
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1: (20 *(dim(y)[1])), ] <- 1 # deleted 20* in 1:5*(dim(y)[1]))
+  zi[1: (20 *(dim(y)[1])), ] <- 1 # deleted 5* in 1:5*(dim(y)[1]))
   sii <- apply(y, c(1, 2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -30,9 +29,9 @@ pars <-
   c("N", "psi", "p0.S", "p0.O", "sigma", "Never", "gamma", "b", "phi")
 
 for (i in 1:nsims) {
-  name.i <- paste("dat.columbian", stub, "_", i, sep = "")
+  name.i <- paste("dat.columbian_", stub, "_", i, sep = "")
   obj.i <- get(name.i)
-  out.i <- paste("open.columbian", stub, "_", i, sep = "")
+  out.i <- paste("open.columbian_", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for all T
   dim.y <- dim(y)
   y.orig <-
@@ -65,13 +64,13 @@ for (i in 1:nsims) {
       inits = init_simple,
       parallel = TRUE, n.cores= 18,
       n.chains = 3,
-      n.burnin = 200,
-      n.adapt = 10,
-      n.iter = 500,
+      n.burnin = 5000,
+      n.adapt = 2000,
+      n.iter = 50000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, ".gzip", sep = ""))
+  save(list = out.i, file = paste(out.i, "50k.RData", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
@@ -79,4 +78,4 @@ end.time <- Sys.time()
 time.taken <- round(end.time - start.time,2)
 time.taken
 
-jags.View(out.test_IM_1)
+jags.View(open.columbian_test_IOM_1)
