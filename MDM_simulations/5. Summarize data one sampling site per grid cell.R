@@ -7,6 +7,8 @@ library(rmapshaper)
 library(stars)
 library(tidyterra)
 library(dplyr)
+library(timechange)
+library(tmap)
 
 #1. Read and plot layers ####
 
@@ -38,6 +40,17 @@ ggplot() +
   geom_sf(data = bc_bound)+
   geom_sf(data = DNA_data_sf, size= 0.3, color= 'red')+
   geom_sf(data = DNA_short, size= 0.1)
+
+data("World")
+tmap_mode("view")
+tm_shape(World) +
+  tm_polygons("HPI")
+
+tm_shape(meso_grid) +
+  tm_polygons("Wgrid") +
+tm_shape(DNA_grid) +
+  tm_symbols(col= "red", scale = 0.05)
+
 
 # Intersect grid with points to obtain geometry of grids 
 
