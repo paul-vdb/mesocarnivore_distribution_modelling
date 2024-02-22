@@ -17,7 +17,7 @@ library(jagsUI)
 M<-300
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1:(20* dim(y)[1])] <- 1 # give 1's to indviduals who were detected by SCR
+  zi[1:(50* dim(y)[1])] <- 1 # give 1's to indviduals who were detected by SCR
   sii <- apply(y, c(1,2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -74,7 +74,7 @@ for(i in 1:nsims){
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, ".Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "5k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 

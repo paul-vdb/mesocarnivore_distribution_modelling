@@ -132,7 +132,7 @@ traps.scale <- as.data.frame(Ssites_columbian_albers/coord.scale)
 
 
 library(scales)
-#coordinates <- select(Ssites_omineca2, Long, Lat) ## scaled coordinates
+#coordinates <- select(Ssites_columbian2, Long, Lat) ## scaled coordinates
 plot(traps.scale, xlab='V1', ylab='V2', frame=FALSE, las=1, pch=10, col='#002A64FF', asp=1)
 summary(traps.scale)
 
@@ -162,12 +162,12 @@ K <- 4 #sampling occasions/ biweekly? 21 days in our sites
 T<-1 # primary sampling periods
 
 # sampling 
-#cam_sites <-  Ssites_omineca2 %>% group_by(DATA_TYPE) %>% summarise(n())
+cam_sites <-  Ssites_columbian2 %>% group_by(DATA_TYPE) %>% summarise(n())
 #J.s <- 25
-J.s<-60 # placing 1761 hair traps on a 60 grids of 12km
+J.s<-163 # placing 1761 hair traps on a 60 grids of 12km
 
 #J.o <- 50
-J.o<-44 # placing 158 camera traps on 44 grids of 12km 
+J.o<-133 # placing 158 camera traps on 44 grids of 12km 
 
 #co <- seq((xlim[1]+2*sigma), (xlim[2]-2*sigma), length=sqrt(J.s)) #starting points for the grid
 
@@ -175,13 +175,13 @@ J.o<-44 # placing 158 camera traps on 44 grids of 12km
 
 #X.o <-cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)))
 
-X.s <- subset(Ssites_omineca2, DATA_TYPE== "DNA")
+X.s <- subset(Ssites_columbian2, DATA_TYPE== "DNA")
 X.s <- select(X.s, V1, V2)
 X.s <- as.data.frame(X.s/coord.scale)
 X.s <- as.matrix(X.s, dim = c(dim(X.s)[1], 2))
 X.s <- unname(X.s) # removed this to see if it helps with error
 
-X.o <- subset(Ssites_omineca2, DATA_TYPE== "CAM")
+X.o <- subset(Ssites_columbian2, DATA_TYPE== "CAM")
 X.o <- select(X.o, V1, V2)
 X.o <- as.data.frame(X.o/coord.scale)
 X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
@@ -247,9 +247,9 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 1
-stub <- "fisher-omineca_IM"
+stub <- "fisher_IM"
 for(i in 1:nsims) {
-  obj.i <- paste("dat.omineca_", stub, "_",i, sep="")
+  obj.i <- paste("dat.columbian_", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
@@ -257,3 +257,4 @@ for(i in 1:nsims) {
                    xlim=xlim, ylim=ylim, X.s=X.s, X.o=X.o, K=K, T=T)
   assign(obj.i, dat.i)
 }
+
