@@ -82,6 +82,8 @@ qgamma(c(0.001,0.5,0.999),1, 0.001)  # 1.005 , 693.14, 6907.76
 
 (sqrt(128/pi)/1)/sqrt(5.99) # maixmun average home range in US Furnas et al. 2017 # 2.60
 
-qgamma(c(0.001,0.5,0.999),13, 10)#0.4611063 1.2668229 2.7025981
+(sqrt(141/pi)/1)/sqrt(5.99) # puntzi lake sigma 2730 m #2.737
 
-dgamma(13,10)
+qgamma(c(0.001,0.5,0.999),10, 8)#0.370065 1.208589 2.832172
+
+dgamma(10,8)
