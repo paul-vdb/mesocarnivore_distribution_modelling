@@ -64,15 +64,24 @@ qgamma(c(0.05,0.5,0.95),75,50) # 1.2269 1.4933 1.7958 - 40 km2.  Values need to 
 
 qgamma(c(0.05,0.5,0.95),4,4) # 0.34158 0.91802 1.93841 - 4-72 km2. Values need to be from 0.46 to 1.95
 
-
 # 3. Columbian populations ####
 
+# Furnas et al. 2017 mean home range between 21-128 km2
 # the home estimated home range for each population is: 
 
-(sqrt(4/pi)/1)/sqrt(5.99) # 0.46
+#priors used by Sun et al. 2019 for bears
 
-(sqrt(16/pi)/1)/sqrt(5.99) # 0.92
+qgamma(c(0.001,0.5,0.999),1, 0.001)  # 1.005 , 693.14, 6907.76
 
-(sqrt(40/pi)/1)/sqrt(5.99) # 1.46
 
-(sqrt(72/pi)/1)/sqrt(5.99) # 1.95
+(sqrt(5/pi)/1)/sqrt(5.99) #  core home range, for female central interior # 0.52
+
+(sqrt(30/pi)/1)/sqrt(5.99) #  average female home range 30km (Davis 2009, Weir et al. 2009) in central interior # 1.26
+
+(sqrt(50/pi)/1)/sqrt(5.99) # expected home range in Columbian populations?  # 1.63
+
+(sqrt(128/pi)/1)/sqrt(5.99) # maixmun average home range in US Furnas et al. 2017 # 2.60
+
+qgamma(c(0.001,0.5,0.999),13, 10)#0.4611063 1.2668229 2.7025981
+
+dgamma(13,10)
