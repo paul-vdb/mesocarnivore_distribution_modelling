@@ -152,7 +152,7 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
-M <- 300 #
+M <- 500 #
 psi <- 0.33 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
@@ -166,7 +166,7 @@ K <- 4 #sampling occasions/ biweekly? 21 days in our sites
 T<-1 # primary sampling periods
 
 # sampling 
-#cam_sites <-  Ssites_cariboo2 %>% group_by(DATA_TYPE) %>% summarise(n())
+cam_sites <-  Ssites_cariboo2 %>% group_by(DATA_TYPE) %>% summarise(n())
 #J.s <- 25
 J.s<-60 # placing 1761 hair traps on a 60 grids of 12km
 
@@ -250,8 +250,8 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 1
-stub <- "fisher_IM"
+nsims <- 9
+stub <- "fisher_ICM"
 for(i in 1:nsims) {
   obj.i <- paste("dat.cariboo_", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
