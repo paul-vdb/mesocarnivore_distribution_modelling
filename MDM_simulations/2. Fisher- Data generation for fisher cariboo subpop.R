@@ -143,7 +143,8 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
-M <- 500 #
+N <- 500
+M <- N*2 #
 psi <- 0.33 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
@@ -185,14 +186,14 @@ X.o <- unname(X.o)
 #cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma))) # 50 random points within the grid. 2*sigma determines what is not included in the sampling area. here its 10 and 90 are the limits, excluding 20% of cells. Thus the sampling area is 64000
 
 ###data generation ####
-simdata <- function(M, psi, p0.s,p0.o, sigma, 
+simdata <- function(M, N, psi, p0.s,p0.o, sigma, 
                     xlim, ylim, X.s,X.o, K, T) {
   J.s <- nrow(X.s)   # number of SCR traps
   J.o <- nrow(X.o)   # number of PA traps
   s <- array(NA, c(M, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
   z <- a <- matrix(NA, M, T) # empty matrix for population membership
   s[,,1] <- cbind(runif(M, xlim[1], xlim[2]), runif(M, ylim[1], ylim[2])) # random activity centers
-  z[,1] <- rbinom(M, 1, psi) # create first year's pop with M from psi.
+  z[,1] <- rbinom(N, 1, psi) # changing from M to N, to have N alwasy the same? create first year's pop with M from psi.
   a[,1] <- z[,1]  # recruited in first year if z=1
   # EB <- sum(z[,1])*gamma # Expected number of births
   # delta <- EB / (M-sum(a[,1])) # Divided by number of available recruits
@@ -241,11 +242,11 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 1
+nsims <- 10
 stub <- "fisher_ICM_cariboo_new"
 for(i in 1:nsims) {
   obj.i <- paste("dat.cariboo_", stub, "_",i, sep="")
-  dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
+  dat.i <- simdata(M=M, N=N, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
                    sigma=sigma,

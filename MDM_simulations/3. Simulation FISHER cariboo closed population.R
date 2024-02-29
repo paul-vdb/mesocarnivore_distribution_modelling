@@ -14,7 +14,7 @@ start.time <- Sys.time()
 library(rjags)
 library(jagsUI)
 
-M<-500
+M<-1000
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
   zi[1:(4* dim(y)[1])] <- 1 #  zi[1:M)] <- 1 give 1's to indviduals who were detected by SCR
@@ -74,7 +74,7 @@ for(i in 1:nsims){
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "cariboo_5k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "new_N_cariboo_5k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
