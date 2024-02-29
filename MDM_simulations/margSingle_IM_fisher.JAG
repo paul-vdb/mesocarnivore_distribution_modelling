@@ -15,7 +15,7 @@ model{
   psi ~ dbeta(1,1)    # M*psi = E[N(1)]
   p0.S ~ dbeta(1,1)
   p0.O ~ dbeta(1,1)
-  sigma ~ dgamma(10, 8) # followed burgar et. al. 2018 for calculations
+  sigma ~ dgamma(6, 4) # followed burgar et. al. 2018 for calculations, 5 to 300km2
   for(t in 1:T) { #(T-1)) {
     N[t] <- sum(z[,t])     # Number of females
   }
