@@ -74,7 +74,7 @@ for(i in 1:nsims){
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "new_N_cariboo_5k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "New_N_cariboo_5k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 

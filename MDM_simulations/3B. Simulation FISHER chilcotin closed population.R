@@ -14,10 +14,10 @@ start.time <- Sys.time()
 library(rjags)
 library(jagsUI)
 
-M<-300
+M <- 1000
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1:(20* dim(y)[1])] <- 1 # give 1's to indviduals who were detected by SCR
+  zi[1:(10 *dim(y)[1])] <- 1 #  zi[1:(4* dim(y)[1])] <- 1 give 1's to indviduals who were detected by SCR
   sii <- apply(y, c(1,2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -63,18 +63,18 @@ for(i in 1:nsims){
   )
   out <-
     jags(
-      "margSingle_IM.JAG",
+      "margSingle_IM_fisher.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 18,
+      parallel = TRUE, n.cores= 28,
       n.chains = 3,
-      n.burnin = 2000,
-      n.adapt = 100,
-      n.iter = 5000,
+      n.burnin = 5000,
+      n.adapt = 2000,
+      n.iter = 50000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, ".Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "chilcotin_50k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
