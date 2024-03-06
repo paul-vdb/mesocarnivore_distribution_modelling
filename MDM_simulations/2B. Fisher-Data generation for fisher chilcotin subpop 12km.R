@@ -23,48 +23,38 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 #crslatlong <- "+proj=longlat" 
 #grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
 
-
 #A.  density studies 
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_11-27b.csv") # file with all density studies 
+df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
 #df <- subset(df, Project_name != "3289")
-df.coords <- dplyr::select(df, x = Longitude_DD, y = Latitude_DD)
-crslatlong <- "+proj=longlat" 
-DNA_data <- vect(df, geom=c("Longitude_DD", "Latitude_DD"), crs=crslatlong) 
-DNA_data_sf <-  sf::st_as_sf(DNA_data, remove= FALSE)
-DNA_data_sf_albers <- st_transform(DNA_data_sf, crs=3005)
-
+DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
+plot(DNA_data_sf)
 #B. Camera studies
 
 #check 5937 project as the conversion from UTM to latlong is wrong, zone problem
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
-cam_df <- read_csv("camera_deployments_01-10.csv")
+cam_df <- read_csv("camera_deployments_11-02c.csv", col_types = cols(Start_Deployment_date = col_date(format = "%Y-%m-%d"), End_Deployment_date = col_date(format = "%Y-%m-%d")))
 cam_df$DATA_TYPE <- "CAM"
-cam.coords <- dplyr::select(cam_df, x = Longitude_DD, y = Latitude_DD)
-Camera_data <- vect(cam_df, geom=c("Longitude_DD", "Latitude_DD"), crs=crslatlong) 
-Camera_data_sf <-  sf::st_as_sf(Camera_data)
-plot(Camera_data)
-
-Camera_data_sf_albers <- st_transform(Camera_data_sf, crs=3005)
+Camera_data_sf <-  cam_df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords=c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
+plot(Camera_data_sf)
 
 #C. academics camera studies
-Academics_cam <- read_csv("academics_cam_feb7.csv")
+Academics_cam <- read_csv("academics_cam_feb7.csv") 
 # still working on final file 
 Academics_cam$DATA_TYPE <- "CAM"
-MDM_academics_plot <- vect(Academics_cam, geom=c("Longitude", "Latitude"), crs=crslatlong)
-MDM_academics_sf <-  sf::st_as_sf(MDM_academics_plot)
-MDM_academics_sf_albers <- st_transform(MDM_academics_sf, crs=3005)
+MDM_academics_sf <- Academics_cam %>% drop_na(Latitude, Longitude) %>% sf::st_as_sf(.,  coords=c("Longitude", "Latitude"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
+plot(MDM_academics_sf)
 
 # 2. Assigned grid number to each sampling site and group by grid ####
 
-cameras_grid <- st_intersection(Camera_data_sf_albers, grid_sf)
+cameras_grid <- st_intersection(Camera_data_sf, grid_sf)
 #cameras_grid3 <- st_collection_extract(cameras_grid, "POLYGON")
 #intersections_lp <- st_intersection(Camera_data_sf_albers, grid_columbian_sf)
-academics_grid <- st_intersection(MDM_academics_sf_albers, grid_sf)
-DNA_grid <- st_intersection(DNA_data_sf_albers, grid_sf)
+academics_grid <- st_intersection(MDM_academics_sf, grid_sf)
+DNA_grid <- st_intersection(DNA_data_sf, grid_sf)
 
 sites_cam <- bind_rows(academics_grid, cameras_grid) 
 
@@ -74,29 +64,29 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 # 2A: Kootenays station missing when intersected with camera grid, fix later same with academics 4 stations missing### ####
 # no data on cameras
+# 
+# Prueba <- DNA_grid %>% #camera grid, 
+#   group_by(Project_name) %>%
+#   tally()
+# 
+# Prueba2 <- DNA_data_sf_albers %>% #camera_data_sf_albers
+#   group_by(Project_name) %>%
+#   tally()
+# 
+# all <- DNA_data_sf %>%  # must be 0
+#   filter(!DNA_data_sf_albers$Station_ID %in% DNA_grid$Station_ID)
+# all
+# 
+# plot
+# 
+# missing_CAM = ggplot() +
+#   geom_sf(data = grid_sf, fill= NA)+
+#   geom_sf(data = DNA_data_sf_albers, color= 'green')+
+#   #geom_sf(data = bc_bound, color= 'black', fill= NA) +
+#   geom_sf(data = all, color= 'yellow')
+# missing_CAM
 
-Prueba <- DNA_grid %>% #camera grid, 
-  group_by(Project_name) %>%
-  tally()
-
-Prueba2 <- DNA_data_sf_albers %>% #camera_data_sf_albers
-  group_by(Project_name) %>%
-  tally()
-
-all <- DNA_data_sf_albers %>%  # must be 0
-  filter(!DNA_data_sf_albers$Station_ID %in% DNA_grid$Station_ID)
-all
-
-plot
-
-missing_CAM = ggplot() +
-  geom_sf(data = grid_sf, fill= NA)+
-  geom_sf(data = DNA_data_sf_albers, color= 'green')+
-  #geom_sf(data = bc_bound, color= 'black', fill= NA) +
-  geom_sf(data = all, color= 'yellow')
-missing_CAM
-
-#3. Filter by population, Chilcotin ####
+#3. Filter by population, chilcotin ####
 
 setwd("C:/LocalR")
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
@@ -107,9 +97,10 @@ subpop <- ms_simplify(subpopulations, keep = 0.001,
 chilcotin <- subpop |> dplyr::filter(Subpop == "Chilcotin")
 
 cameras_chilcotin <- st_intersection(chilcotin, sites_cam) # no intersection 
-cameras_chilcotin_unique <-  cameras_chilcotin %>% distinct(WID_12km, .keep_all = TRUE)
+cameras_chilcotin_unique <-  cameras_chilcotin %>% distinct(MID_3km, .keep_all = TRUE)
 DNA_chilcotin <- st_intersection(chilcotin, DNA_grid) # reducing smapling sites to grid cell of 12km
-DNA_chilcotin_unique <-  DNA_chilcotin %>% distinct(WID_12km, .keep_all = TRUE) # reducing smapling sites to grid cell of 12km
+DNA_chilcotin_unique <-  DNA_chilcotin %>% distinct(MID_3km, .keep_all = TRUE) # reducing smapling sites to grid cell of 12km
+DNA_chilcotin_unique$Habitat_type <- as.character(DNA_chilcotin_unique$Habitat_type)
 sites_chilcotin <- bind_rows(cameras_chilcotin_unique, DNA_chilcotin_unique)
 
 plot1 = ggplot() +
@@ -135,6 +126,7 @@ traps.scale <- as.data.frame(Ssites_chilcotin_albers/coord.scale)
 # NEED TO SCALE COORDINATES TO REDUCE THE AREA IN THE STATE SPACE, plot X.s and Xo to make sure traps have the same scale ## 
 
 #define statespace, using chilcotin subpopulation data 
+
 library(scales)
 #coordinates <- select(Ssites_chilcotin2, Long, Lat) ## scaled coordinates
 plot(traps.scale, xlab='V1', ylab='V2', frame=FALSE, las=1, pch=10, col='#002A64FF', asp=1)
@@ -152,26 +144,28 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
-M <- 300 #
+N <- 500 #
+M <- N*2 
 psi <- 0.33 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
 sigma <- 3 #scale parameter 5km approximate movement of bears 
 
 #sampling 
-p0.s<-0.18 #detection probability SCR
+p0.s<-0.3 #detection probability SCR, puntzi lake study
 p0.o<-0.1 #Detection probability PA, generally lower than SCR but can use higher too
 K <- 4 #sampling occasions/ biweekly? 21 days in our sites
 
 T<-1 # primary sampling periods
 
 # sampling 
-#cam_sites <-  Ssites_chilcotin2 %>% group_by(DATA_TYPE) %>% summarise(n())
+cam_sites <-  Ssites_chilcotin2 %>% group_by(DATA_TYPE) %>% summarise(n())
+cam_sites
 #J.s <- 25
-J.s<-60 # placing 1761 hair traps on a 60 grids of 12km
+J.s<-340 # placing 1761 hair traps on a 60 grids of 12km
 
 #J.o <- 50
-J.o<-44 # placing 158 camera traps on 44 grids of 12km 
+J.o<-141 # placing 158 camera traps on 44 grids of 12km 
 
 #co <- seq((xlim[1]+2*sigma), (xlim[2]-2*sigma), length=sqrt(J.s)) #starting points for the grid
 
@@ -194,14 +188,14 @@ X.o <- unname(X.o)
 #cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma))) # 50 random points within the grid. 2*sigma determines what is not included in the sampling area. here its 10 and 90 are the limits, excluding 20% of cells. Thus the sampling area is 64000
 
 ###data generation ####
-simdata <- function(M, psi, p0.s,p0.o, sigma, 
+simdata <- function(N, psi, p0.s,p0.o, sigma, 
                     xlim, ylim, X.s,X.o, K, T) {
   J.s <- nrow(X.s)   # number of SCR traps
   J.o <- nrow(X.o)   # number of PA traps
-  s <- array(NA, c(M, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
-  z <- a <- matrix(NA, M, T) # empty matrix for population membership
-  s[,,1] <- cbind(runif(M, xlim[1], xlim[2]), runif(M, ylim[1], ylim[2])) # random activity centers
-  z[,1] <- rbinom(M, 1, psi) # create first year's pop with M from psi.
+  s <- array(NA, c(N, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
+  z <- a <- matrix(NA, N, T) # empty matrix for population membership
+  s[,,1] <- cbind(runif(N, xlim[1], xlim[2]), runif(N, ylim[1], ylim[2])) # random activity centers
+  z[,1] <- rbinom(N, 1, psi) # create first year's pop with M from psi.
   a[,1] <- z[,1]  # recruited in first year if z=1
   # EB <- sum(z[,1])*gamma # Expected number of births
   # delta <- EB / (M-sum(a[,1])) # Divided by number of available recruits
@@ -220,13 +214,13 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   # s[,2] <- s[,2,t] # constant activity centers
   
   ##for scr data
-  yall.s <- array(0, c(M, J.s, K, T)) # create empty array to put in data
+  yall.s <- array(0, c(N, J.s, K, T)) # create empty array to put in data
   for(j in 1:J.s) {
     for(k in 1:K) {
       for(t in 1:T) {
         d2.s <- (X.s[j,1] - s[,1, t])^2 + (X.s[j,2] - s[,2, t])^2
         p.s <- p0.s * exp(-d2.s/(2*sigma^2)) #detection prob half normal distrb.
-        yall.s[,j,k,t] <- rbinom(M, 1, p.s*z[,t])
+        yall.s[,j,k,t] <- rbinom(N, 1, p.s*z[,t])
       }
     }
   }
@@ -234,14 +228,14 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   O.s <- ifelse(apply(yall.s, 2:4, sum) > 0, 1, 0) # if detected =>1x, then O=1 
   ##for PA data
   ################
-  yall.o <- array(0, c(M, J.o, K, T)) # create empty array to put in data
+  yall.o <- array(0, c(N, J.o, K, T)) # create empty array to put in data
   # yall <- array(0, c(M, J))
   for(j in 1:J.o) {
     for(k in 1:K) {
       for(t in 1:T) {
         d2.o <- (X.o[j,1] - s[,1,t])^2 + (X.o[j,2] - s[,2,t])^2
         p.o <- p0.o * exp(-d2.o/(2*sigma^2))
-        yall.o[,j,k,t] <- rbinom(M, 1, p.o*z[,t])
+        yall.o[,j,k,t] <- rbinom(N, 1, p.o*z[,t])
       }
     }
   }
@@ -251,13 +245,14 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 1
-stub <- "fisher-chilcotin_IM"
+stub <- "fisher_ICM_chilcotin_newN_"
 for(i in 1:nsims) {
   obj.i <- paste("dat.chilcotin_", stub, "_",i, sep="")
-  dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
+  dat.i <- simdata(N=N, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
                    sigma=sigma,
                    xlim=xlim, ylim=ylim, X.s=X.s, X.o=X.o, K=K, T=T)
   assign(obj.i, dat.i)
 }
+
