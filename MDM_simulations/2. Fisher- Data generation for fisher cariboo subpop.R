@@ -143,6 +143,8 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
+# mu <- 50 #density
+# N <- rpois(1, mu*A) #A is Area((xlim[2] - xlim[1]) * (ylim[2] - ylim[1])/10000)
 N <- 500
 M <- N*2 #
 psi <- 0.33 #data augmentation ?
