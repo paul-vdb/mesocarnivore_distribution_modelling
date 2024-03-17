@@ -144,9 +144,9 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
-N <- 500 #
-M <- N*2 
-psi <- 0.33 #data augmentation ?
+
+M <- 1500
+psi <- 0.3 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
 sigma <- 3 #scale parameter 5km approximate movement of bears 
@@ -188,14 +188,14 @@ X.o <- unname(X.o)
 #cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma))) # 50 random points within the grid. 2*sigma determines what is not included in the sampling area. here its 10 and 90 are the limits, excluding 20% of cells. Thus the sampling area is 64000
 
 ###data generation ####
-simdata <- function(N, psi, p0.s,p0.o, sigma, 
+simdata <- function(M, psi, p0.s,p0.o, sigma, 
                     xlim, ylim, X.s,X.o, K, T) {
   J.s <- nrow(X.s)   # number of SCR traps
   J.o <- nrow(X.o)   # number of PA traps
-  s <- array(NA, c(N, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
-  z <- a <- matrix(NA, N, T) # empty matrix for population membership
-  s[,,1] <- cbind(runif(N, xlim[1], xlim[2]), runif(N, ylim[1], ylim[2])) # random activity centers
-  z[,1] <- rbinom(N, 1, psi) # create first year's pop with M from psi.
+  s <- array(NA, c(M, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
+  z <- a <- matrix(NA, M, T) # empty matrix for population membership
+  s[,,1] <- cbind(runif(M, xlim[1], xlim[2]), runif(M, ylim[1], ylim[2])) # random activity centers
+  z[,1] <- rbinom(M, 1, psi) # create first year's pop with M from psi.
   a[,1] <- z[,1]  # recruited in first year if z=1
   # EB <- sum(z[,1])*gamma # Expected number of births
   # delta <- EB / (M-sum(a[,1])) # Divided by number of available recruits
@@ -214,13 +214,13 @@ simdata <- function(N, psi, p0.s,p0.o, sigma,
   # s[,2] <- s[,2,t] # constant activity centers
   
   ##for scr data
-  yall.s <- array(0, c(N, J.s, K, T)) # create empty array to put in data
+  yall.s <- array(0, c(M, J.s, K, T)) # create empty array to put in data
   for(j in 1:J.s) {
     for(k in 1:K) {
       for(t in 1:T) {
         d2.s <- (X.s[j,1] - s[,1, t])^2 + (X.s[j,2] - s[,2, t])^2
         p.s <- p0.s * exp(-d2.s/(2*sigma^2)) #detection prob half normal distrb.
-        yall.s[,j,k,t] <- rbinom(N, 1, p.s*z[,t])
+        yall.s[,j,k,t] <- rbinom(M, 1, p.s*z[,t])
       }
     }
   }
@@ -228,14 +228,14 @@ simdata <- function(N, psi, p0.s,p0.o, sigma,
   O.s <- ifelse(apply(yall.s, 2:4, sum) > 0, 1, 0) # if detected =>1x, then O=1 
   ##for PA data
   ################
-  yall.o <- array(0, c(N, J.o, K, T)) # create empty array to put in data
+  yall.o <- array(0, c(M, J.o, K, T)) # create empty array to put in data
   # yall <- array(0, c(M, J))
   for(j in 1:J.o) {
     for(k in 1:K) {
       for(t in 1:T) {
         d2.o <- (X.o[j,1] - s[,1,t])^2 + (X.o[j,2] - s[,2,t])^2
         p.o <- p0.o * exp(-d2.o/(2*sigma^2))
-        yall.o[,j,k,t] <- rbinom(N, 1, p.o*z[,t])
+        yall.o[,j,k,t] <- rbinom(M, 1, p.o*z[,t])
       }
     }
   }
@@ -244,11 +244,11 @@ simdata <- function(N, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 1
+nsims <- 3
 stub <- "fisher_ICM_chilcotin_newN_"
 for(i in 1:nsims) {
   obj.i <- paste("dat.chilcotin_", stub, "_",i, sep="")
-  dat.i <- simdata(N=N, psi=psi, #gamma=gamma, phi=phi,
+  dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
                    sigma=sigma,
