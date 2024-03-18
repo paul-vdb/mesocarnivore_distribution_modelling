@@ -1,23 +1,20 @@
-### Fit various models for cariboo subpopulation
+### Fit various models for chilcotin subpopulation
 
 ##########################
 ### fit marginal closed model
 ##########################
 
-#.libPaths()
-#.libPaths('C:/Users/CHURTADO/AppData/R') # this is a new path
-#.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
+#set working directory to where the file MargSingle_IM_fisher.JAG is saved
 
-setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 start.time <- Sys.time()
 
 library(rjags)
 library(jagsUI)
 
-M<-1000
+M <- 1500
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1:(4* dim(y)[1])] <- 1 #  zi[1:M)] <- 1 give 1's to indviduals who were detected by SCR
+  zi[1:M] <- 1 #  zi[1:(4* dim(y)[1])] <- 1 give 1's to indviduals who were detected by SCR
   sii <- apply(y, c(1,2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -33,14 +30,13 @@ init_simple <- function() {
 pars <- c("N","psi","p0.S","p0.O","sigma","Never")
 
 for(i in 1:nsims){
-  name.i <- paste("dat.cariboo_", stub, "_", i, sep = "")
+  name.i <- paste("dat.chilcotin_", stub, "_", i, sep = "")
   obj.i <- get(name.i)
   out.i <- paste("out.", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for first T
   dim.y <- dim(y)
   y.orig <- array(0L, c(dim.y[1] + 1, dim.y[2], dim.y[3]))
-  y.orig [1:nrow(y), , ] <-
-    y # observed data augmented only with 1 row
+  y.orig [1:nrow(y), , ] <- y # observed data augmented only with 1 row
   O <- obj.i$O.o[, , 1]
   X.s <- as.matrix(obj.i$X.s)
   X.o <- as.matrix(obj.i$X.o)
@@ -68,13 +64,13 @@ for(i in 1:nsims){
       inits = init_simple,
       parallel = TRUE, n.cores= 28,
       n.chains = 3,
-      n.burnin = 1000,
-      n.adapt = 500,
-      n.iter = 5000,
+      n.burnin = 500,
+      n.adapt = 800,
+      n.iter = 3000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "New_N_cariboo_5k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "simulations_3k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 

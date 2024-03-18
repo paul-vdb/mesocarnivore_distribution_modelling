@@ -26,44 +26,35 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 #A.  density studies 
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_11-27b.csv") # file with all density studies 
+df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
-#df <- subset(df, Project_name != "3289")
-df.coords <- dplyr::select(df, x = Longitude_DD, y = Latitude_DD)
-crslatlong <- "+proj=longlat" 
-DNA_data <- vect(df, geom=c("Longitude_DD", "Latitude_DD"), crs=crslatlong) 
-DNA_data_sf <-  sf::st_as_sf(DNA_data, remove= FALSE)
-DNA_data_sf_albers <- st_transform(DNA_data_sf, crs=3005)
-
+df <- subset(df, Project_name != "3289" | Project_name != "Hat Creek" | Project_name != "3269")
+DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
+plot(DNA_data_sf)
 #B. Camera studies
 
 #check 5937 project as the conversion from UTM to latlong is wrong, zone problem
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
-cam_df <- read_csv("camera_deployments_01-10.csv")
+cam_df <- read_csv("camera_deployments_11-02c.csv", col_types = cols(Start_Deployment_date = col_date(format = "%Y-%m-%d"), End_Deployment_date = col_date(format = "%Y-%m-%d")))
 cam_df$DATA_TYPE <- "CAM"
-cam.coords <- dplyr::select(cam_df, x = Longitude_DD, y = Latitude_DD)
-Camera_data <- vect(cam_df, geom=c("Longitude_DD", "Latitude_DD"), crs=crslatlong) 
-Camera_data_sf <-  sf::st_as_sf(Camera_data)
-plot(Camera_data)
-
-Camera_data_sf_albers <- st_transform(Camera_data_sf, crs=3005)
+Camera_data_sf <-  cam_df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords=c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
+plot(Camera_data_sf)
 
 #C. academics camera studies
-Academics_cam <- read_csv("academics_cam_feb7.csv")
+Academics_cam <- read_csv("academics_cam_feb7.csv") 
 # still working on final file 
 Academics_cam$DATA_TYPE <- "CAM"
-MDM_academics_plot <- vect(Academics_cam, geom=c("Longitude", "Latitude"), crs=crslatlong)
-MDM_academics_sf <-  sf::st_as_sf(MDM_academics_plot)
-MDM_academics_sf_albers <- st_transform(MDM_academics_sf, crs=3005)
+MDM_academics_sf <- Academics_cam %>% drop_na(Latitude, Longitude) %>% sf::st_as_sf(.,  coords=c("Longitude", "Latitude"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
+plot(MDM_academics_sf)
 
 # 2. Assigned grid number to each sampling site and group by grid ####
 
-cameras_grid <- st_intersection(Camera_data_sf_albers, grid_sf)
+cameras_grid <- st_intersection(Camera_data_sf, grid_sf)
 #cameras_grid3 <- st_collection_extract(cameras_grid, "POLYGON")
 #intersections_lp <- st_intersection(Camera_data_sf_albers, grid_columbian_sf)
-academics_grid <- st_intersection(MDM_academics_sf_albers, grid_sf)
-DNA_grid <- st_intersection(DNA_data_sf_albers, grid_sf)
+academics_grid <- st_intersection(MDM_academics_sf, grid_sf)
+DNA_grid <- st_intersection(DNA_data_sf, grid_sf) %>% subset(Project_name != "Hat Creek" | Project_name != "3269")
 
 sites_cam <- bind_rows(academics_grid, cameras_grid) 
 
@@ -73,27 +64,27 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 # 2A: Kootenays station missing when intersected with camera grid, fix later same with academics 4 stations missing### ####
 # no data on cameras
-
-Prueba <- DNA_grid %>% #camera grid, 
-  group_by(Project_name) %>%
-  tally()
-
-Prueba2 <- DNA_data_sf_albers %>% #camera_data_sf_albers
-  group_by(Project_name) %>%
-  tally()
-
-all <- DNA_data_sf_albers %>%  # must be 0
-  filter(!DNA_data_sf_albers$Station_ID %in% DNA_grid$Station_ID)
-all
-
-plot
-
-missing_CAM = ggplot() +
-  geom_sf(data = grid_sf, fill= NA)+
-  geom_sf(data = DNA_data_sf_albers, color= 'green')+
-  #geom_sf(data = bc_bound, color= 'black', fill= NA) +
-  geom_sf(data = all, color= 'yellow')
-missing_CAM
+# 
+# Prueba <- DNA_grid %>% #camera grid, 
+#   group_by(Project_name) %>%
+#   tally()
+# 
+# Prueba2 <- DNA_data_sf_albers %>% #camera_data_sf_albers
+#   group_by(Project_name) %>%
+#   tally()
+# 
+# all <- DNA_data_sf %>%  # must be 0
+#   filter(!DNA_data_sf_albers$Station_ID %in% DNA_grid$Station_ID)
+# all
+# 
+# plot
+# 
+# missing_CAM = ggplot() +
+#   geom_sf(data = grid_sf, fill= NA)+
+#   geom_sf(data = DNA_data_sf_albers, color= 'green')+
+#   #geom_sf(data = bc_bound, color= 'black', fill= NA) +
+#   geom_sf(data = all, color= 'yellow')
+# missing_CAM
 
 #3. Filter by population, cariboo ####
 
@@ -106,10 +97,10 @@ subpop <- ms_simplify(subpopulations, keep = 0.001,
 cariboo <- subpop |> dplyr::filter(Subpop == "Cariboo")
 
 cameras_cariboo <- st_intersection(cariboo, sites_cam) # no intersection 
-cameras_cariboo_unique <-  cameras_cariboo %>% distinct(WID_12km, .keep_all = TRUE)
+cameras_cariboo_unique <-  cameras_cariboo %>% distinct(MID_3km, .keep_all = TRUE)
 DNA_cariboo <- st_intersection(cariboo, DNA_grid) # reducing smapling sites to grid cell of 12km
-DNA_cariboo_unique <-  DNA_cariboo %>% distinct(WID_12km, .keep_all = TRUE) # reducing smapling sites to grid cell of 12km
-sites_cariboo <- bind_rows(cameras_cariboo_unique, DNA_cariboo_unique)
+DNA_cariboo_unique <-  DNA_cariboo %>% distinct(MID_3km, .keep_all = TRUE) # reducing smapling sites to grid cell of 12km
+sites_cariboo <- bind_rows(cameras_cariboo_unique, DNA_cariboo_unique) 
 
 plot1 = ggplot() +
   #geom_sf(data = grid_sf, fill= NA)+
@@ -152,14 +143,17 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
-M <- 500 #
+# mu <- 50 #density
+# N <- rpois(1, mu*A) #A is Area((xlim[2] - xlim[1]) * (ylim[2] - ylim[1])/10000)
+N <- 500
+M <- N*2 #
 psi <- 0.33 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
-sigma <- 3 #scale parameter 5km approximate movement of bears 
+sigma <- 3 #scale parameter btw 0.5 and 4 for fishers. 
 
 #sampling 
-p0.s<-0.18 #detection probability SCR
+p0.s<-0.3 #detection probability SCR, puntzi lake study
 p0.o<-0.1 #Detection probability PA, generally lower than SCR but can use higher too
 K <- 4 #sampling occasions/ biweekly? 21 days in our sites
 
@@ -167,11 +161,12 @@ T<-1 # primary sampling periods
 
 # sampling 
 cam_sites <-  Ssites_cariboo2 %>% group_by(DATA_TYPE) %>% summarise(n())
+cam_sites
 #J.s <- 25
-J.s<-60 # placing 1761 hair traps on a 60 grids of 12km
+J.s<-366 # placing 1761 hair traps on a 60 grids of 12km
 
 #J.o <- 50
-J.o<-44 # placing 158 camera traps on 44 grids of 12km 
+J.o<-87 # placing 158 camera traps on 44 grids of 12km 
 
 #co <- seq((xlim[1]+2*sigma), (xlim[2]-2*sigma), length=sqrt(J.s)) #starting points for the grid
 
@@ -179,14 +174,12 @@ J.o<-44 # placing 158 camera traps on 44 grids of 12km
 
 #X.o <-cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)))
 
-X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA")
-X.s <- select(X.s, V1, V2)
+X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA") %>%  select(V1, V2) 
 X.s <- as.data.frame(X.s/coord.scale)
 X.s <- as.matrix(X.s, dim = c(dim(X.s)[1], 2))
 X.s <- unname(X.s) # removed this to see if it helps with error
 
-X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM")
-X.o <- select(X.o, V1, V2)
+X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM") %>% select(V1, V2)
 X.o <- as.data.frame(X.o/coord.scale)
 X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
 X.o <- unname(X.o)
@@ -194,14 +187,14 @@ X.o <- unname(X.o)
 #cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma))) # 50 random points within the grid. 2*sigma determines what is not included in the sampling area. here its 10 and 90 are the limits, excluding 20% of cells. Thus the sampling area is 64000
 
 ###data generation ####
-simdata <- function(M, psi, p0.s,p0.o, sigma, 
+simdata <- function(M, N, psi, p0.s,p0.o, sigma, 
                     xlim, ylim, X.s,X.o, K, T) {
   J.s <- nrow(X.s)   # number of SCR traps
   J.o <- nrow(X.o)   # number of PA traps
   s <- array(NA, c(M, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
   z <- a <- matrix(NA, M, T) # empty matrix for population membership
   s[,,1] <- cbind(runif(M, xlim[1], xlim[2]), runif(M, ylim[1], ylim[2])) # random activity centers
-  z[,1] <- rbinom(M, 1, psi) # create first year's pop with M from psi.
+  z[,1] <- rbinom(N, 1, psi) # changing from M to N, to have N alwasy the same? create first year's pop with M from psi.
   a[,1] <- z[,1]  # recruited in first year if z=1
   # EB <- sum(z[,1])*gamma # Expected number of births
   # delta <- EB / (M-sum(a[,1])) # Divided by number of available recruits
@@ -250,11 +243,11 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 9
-stub <- "fisher_ICM"
+nsims <- 8
+stub <- "fisher_ICM_cariboo_new"
 for(i in 1:nsims) {
   obj.i <- paste("dat.cariboo_", stub, "_",i, sep="")
-  dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
+  dat.i <- simdata(M=M, N=N, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
                    sigma=sigma,
