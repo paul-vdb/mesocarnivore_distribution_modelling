@@ -11,22 +11,17 @@ setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 # Change p.o and p.s init parameters to 0.05
 # simulate with fisher parameters and lower p.o and p.s
 
-
-
 #1. Select the model 
-cariboo.list <- list()
-<<<<<<< HEAD
-cariboo.list[[1]] <- out.fisher_ICM_chilcotin_newN__1
 
-cariboo.list[[2]]  <- out.fisher_ICM_cariboo_new_2
-=======
+ #M= 500
+#priors not set.
+cariboo.list <- list()
 cariboo.list[[1]] <- out.fisher_ICM_1
 cariboo.list[[2]]  <- out.fisher_ICM_2
->>>>>>> 28fc0682a0e4c6dd3c710cc53c1700fb94fc789a
 cariboo.list[[3]]  <- out.fisher_ICM_3
 cariboo.list[[4]]  <- out.fisher_ICM_4
 cariboo.list[[5]]  <- out.fisher_ICM_5
-cariboo.list[[6]]  <- out.fisher_ICM_chilcotin_newN__1
+#cariboo.list[[6]]  <- out.fisher_ICM_chilcotin_newN__1
 
 
 Abundance <- list()
@@ -48,15 +43,13 @@ plot4<- ggplot(Abundance[[4]], aes(x = name, y = value))+
   geom_violin()
 plot5<- ggplot(Abundance[[5]], aes(x = name, y = value))+ 
   geom_violin()
-plot6<- ggplot(Abundance[[6]], aes(x = name, y = value))+ 
-  geom_violin()
+# plot6<- ggplot(Abundance[[6]], aes(x = name, y = value))+ 
+#   geom_violin()
 
-plot <- list(plot1, plot2, plot3, plot4, plot5, plot6)
+plot <- list(plot1, plot2, plot3, plot4, plot5)#, plot6)
 
 n <- length(plot)
 grid.arrange(grobs= plot, ncol=2)
-
-
 
 
 m2 <- out.fisher_ICM_chilcotin_newN__1 # 5k iterations
@@ -100,33 +93,36 @@ colnames(N.df) <- c("N1")
 Abundance <- N.df %>% pivot_longer(cols = c(N1)) 
 
 ggplot(Abundance, aes(x = name, y = value))+ geom_violin()
-   
+
+# 4. Start here with new models
+m2 <- out.fisher_ICM_chilcotin_newN__1
+
 model.list <- list()
-model.list[[1]] <- out.fisher_ICM_cariboo_new_1
-model.list[[2]] <- out.fisher_ICM_cariboo_new_2
-  
-<<<<<<< HEAD
+model.list[[1]] <- out.fisher_ICM_chilcotin_newN__1
+model.list[[2]] <- out.fisher_ICM_chilcotin_newN__2
+model.list[[3]] <- m2
 Abundance <- list()
 N.df <- list()
 
-for(i in 1:length(cariboo.list)) {    
-N.df[[i]] <- as.data.frame(cariboo.list[[i]]$sims.list$N)
+for(i in 1:length(model.list)) {    
+N.df[[i]] <- as.data.frame(model.list[[i]]$sims.list$N)
 colnames(N.df[[i]]) <- "N"
 Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
 
 }
 plot1<- ggplot(Abundance[[1]], aes(x = name, y = value))+ 
-  geom_violin()
+  geom_violin() + geom_hline(yintercept=500, linetype="dashed", 
+                             color = "red", size=2)
 plot2<- ggplot(Abundance[[2]], aes(x = name, y = value))+ 
+  geom_violin() + geom_hline(yintercept=500, linetype="dashed", 
+                               color = "red", size=2)
+plot3<- ggplot(Abundance[[3]], aes(x = name, y = value))+ 
+  geom_violin()+ geom_hline(yintercept=500, linetype="dashed", 
+                            color = "red", size=2)
+plot4<- ggplot(Abundance[[4]], aes(x = name, y = value))+ 
   geom_violin()
-#plot3<- ggplot(Abundance[[3]], aes(x = name, y = value))+ 
-#  geom_violin()
-#plot4<- ggplot(Abundance[[4]], aes(x = name, y = value))+ 
-#  geom_violin()
 
-plot <- list(plot1, plot2)#, plot3, plot4)
+plot <- list(plot1, plot2, plot3)#, plot4)
 
 n <- length(plot)
-grid.arrange(grobs= plot, ncol=2)
-=======
->>>>>>> 28fc0682a0e4c6dd3c710cc53c1700fb94fc789a
+grid.arrange(grobs= plot, ncol=3)
