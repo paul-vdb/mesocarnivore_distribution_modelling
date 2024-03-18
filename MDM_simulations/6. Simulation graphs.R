@@ -15,7 +15,8 @@ setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 
 #1. Select the model 
 cariboo.list <- list()
-cariboo.list[[1]] <- out.fisher_ICM_cariboo_new_1
+cariboo.list[[1]] <- out.fisher_ICM_chilcotin_newN__1
+
 cariboo.list[[2]]  <- out.fisher_ICM_cariboo_new_2
 cariboo.list[[3]]  <- out.fisher_ICM_3
 cariboo.list[[4]]  <- out.fisher_ICM_4
@@ -70,8 +71,8 @@ model.list[[2]] <- out.fisher_ICM_cariboo_new_2
 Abundance <- list()
 N.df <- list()
 
-for(i in 1:length(model.list)) {    
-N.df[[i]] <- as.data.frame(model.list[[i]]$sims.list$N)
+for(i in 1:length(cariboo.list)) {    
+N.df[[i]] <- as.data.frame(cariboo.list[[i]]$sims.list$N)
 colnames(N.df[[i]]) <- "N"
 Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
 
