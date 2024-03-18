@@ -15,13 +15,51 @@ setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 
 #1. Select the model 
 cariboo.list <- list()
+<<<<<<< HEAD
 cariboo.list[[1]] <- out.fisher_ICM_chilcotin_newN__1
 
 cariboo.list[[2]]  <- out.fisher_ICM_cariboo_new_2
+=======
+cariboo.list[[1]] <- out.fisher_ICM_1
+cariboo.list[[2]]  <- out.fisher_ICM_2
+>>>>>>> 28fc0682a0e4c6dd3c710cc53c1700fb94fc789a
 cariboo.list[[3]]  <- out.fisher_ICM_3
 cariboo.list[[4]]  <- out.fisher_ICM_4
+cariboo.list[[5]]  <- out.fisher_ICM_5
+cariboo.list[[6]]  <- out.fisher_ICM_chilcotin_newN__1
 
-m2 <- out.fisher_ICM_cariboo_new_1 # 5k iterations
+
+Abundance <- list()
+N.df <- list()
+
+for(i in 1:length(cariboo.list)) {    
+  N.df[[i]] <- as.data.frame(cariboo.list[[i]]$sims.list$N)
+  colnames(N.df[[i]]) <- "N"
+  Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+  
+}
+plot1<- ggplot(Abundance[[1]], aes(x = name, y = value))+ 
+  geom_violin()
+plot2<- ggplot(Abundance[[2]], aes(x = name, y = value))+ 
+  geom_violin()
+plot3<- ggplot(Abundance[[3]], aes(x = name, y = value))+ 
+  geom_violin()
+plot4<- ggplot(Abundance[[4]], aes(x = name, y = value))+ 
+  geom_violin()
+plot5<- ggplot(Abundance[[5]], aes(x = name, y = value))+ 
+  geom_violin()
+plot6<- ggplot(Abundance[[6]], aes(x = name, y = value))+ 
+  geom_violin()
+
+plot <- list(plot1, plot2, plot3, plot4, plot5, plot6)
+
+n <- length(plot)
+grid.arrange(grobs= plot, ncol=2)
+
+
+
+
+m2 <- out.fisher_ICM_chilcotin_newN__1 # 5k iterations
 model2 <- open.cariboo_test_IOM_1 ## 50k iterations
 model3 <- open.chilcotin_test_IOM_chilcotin_1 # 50k iterations
 
@@ -36,13 +74,12 @@ jags.View(model)
 #3. rough plot of parameters 
 
 trace.list <- list()
-trace.list[[1]] <- traceplot(out.fisher_ICM_cariboo_new_1,param= c("p0.S", "N", "p0.O"))
-trace.list[[2]] <- traceplot(out.fisher_ICM_chilcotin_new_1,param= c("p0.S", "N", "p0.O"))
+trace.list[[1]] <- traceplot(cariboo.list[[1]] ,param= c("p0.S", "N", "p0.O", "psi"))
+trace.list[[2]] <- traceplot(cariboo.list[[2]] ,param= c("p0.S", "N", "p0.O", "psi"))
+trace.list[[3]] <- traceplot(cariboo.list[[3]] ,param= c("p0.S", "N", "p0.O", "psi"))
+trace.list[[4]] <- traceplot(cariboo.list[[4]] ,param= c("p0.S", "N", "p0.O", "psi"))
+trace.list[[5]] <- traceplot(cariboo.list[[5]] ,param= c("p0.S", "N", "p0.O", "psi"))
 
-#trace.list[[1]] <- traceplot(cariboo.list[[1]],param= c("p0.S", "N", "p0.O"))
-#trace.list[[2]] <- traceplot(cariboo.list[[2]],param= c("p0.S", "N", "p0.O"))
-#trace.list[[3]] <- traceplot(cariboo.list[[3]],param= c("p0.S", "N", "p0.O"))
-#trace.list[[4]] <- traceplot(cariboo.list[[4]],param= c("p0.S", "N", "p0.O"))
 grid.arrange(grobs= trace.list, ncol=2)
 
 traceplot(m2,param= c("p0.S", "N", "p0.O"))
@@ -58,9 +95,9 @@ whiskerplot(model2, parameters = c("p0.O"))
 
 #3. create a violin plot 
 
-N.df <- as.data.frame(model3$sims.list$N)
-colnames(N.df) <- c("N1", "N2", "N3", "N4")
-Abundance <- N.df %>% pivot_longer(cols = c(N1, N2, N3, N4)) 
+N.df <- as.data.frame(m2$sims.list$N)
+colnames(N.df) <- c("N1")
+Abundance <- N.df %>% pivot_longer(cols = c(N1)) 
 
 ggplot(Abundance, aes(x = name, y = value))+ geom_violin()
    
@@ -68,6 +105,7 @@ model.list <- list()
 model.list[[1]] <- out.fisher_ICM_cariboo_new_1
 model.list[[2]] <- out.fisher_ICM_cariboo_new_2
   
+<<<<<<< HEAD
 Abundance <- list()
 N.df <- list()
 
@@ -90,3 +128,5 @@ plot <- list(plot1, plot2)#, plot3, plot4)
 
 n <- length(plot)
 grid.arrange(grobs= plot, ncol=2)
+=======
+>>>>>>> 28fc0682a0e4c6dd3c710cc53c1700fb94fc789a
