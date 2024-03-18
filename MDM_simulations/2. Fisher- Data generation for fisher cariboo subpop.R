@@ -26,9 +26,9 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 #A.  density studies 
 setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_02-26.csv") # file with all density studies 
+df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
-#df <- subset(df, Project_name != "3289")
+df <- subset(df, Project_name != "3289" | Project_name != "Hat Creek" | Project_name != "3269")
 DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
 plot(DNA_data_sf)
 #B. Camera studies
@@ -54,7 +54,7 @@ cameras_grid <- st_intersection(Camera_data_sf, grid_sf)
 #cameras_grid3 <- st_collection_extract(cameras_grid, "POLYGON")
 #intersections_lp <- st_intersection(Camera_data_sf_albers, grid_columbian_sf)
 academics_grid <- st_intersection(MDM_academics_sf, grid_sf)
-DNA_grid <- st_intersection(DNA_data_sf, grid_sf)
+DNA_grid <- st_intersection(DNA_data_sf, grid_sf) %>% subset(Project_name != "Hat Creek" | Project_name != "3269")
 
 sites_cam <- bind_rows(academics_grid, cameras_grid) 
 
@@ -100,7 +100,7 @@ cameras_cariboo <- st_intersection(cariboo, sites_cam) # no intersection
 cameras_cariboo_unique <-  cameras_cariboo %>% distinct(MID_3km, .keep_all = TRUE)
 DNA_cariboo <- st_intersection(cariboo, DNA_grid) # reducing smapling sites to grid cell of 12km
 DNA_cariboo_unique <-  DNA_cariboo %>% distinct(MID_3km, .keep_all = TRUE) # reducing smapling sites to grid cell of 12km
-sites_cariboo <- bind_rows(cameras_cariboo_unique, DNA_cariboo_unique)
+sites_cariboo <- bind_rows(cameras_cariboo_unique, DNA_cariboo_unique) 
 
 plot1 = ggplot() +
   #geom_sf(data = grid_sf, fill= NA)+
@@ -150,7 +150,7 @@ M <- N*2 #
 psi <- 0.33 #data augmentation ?
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
-sigma <- 3 #scale parameter 5km approximate movement of bears 
+sigma <- 3 #scale parameter btw 0.5 and 4 for fishers. 
 
 #sampling 
 p0.s<-0.3 #detection probability SCR, puntzi lake study
@@ -161,8 +161,9 @@ T<-1 # primary sampling periods
 
 # sampling 
 cam_sites <-  Ssites_cariboo2 %>% group_by(DATA_TYPE) %>% summarise(n())
+cam_sites
 #J.s <- 25
-J.s<-330 # placing 1761 hair traps on a 60 grids of 12km
+J.s<-366 # placing 1761 hair traps on a 60 grids of 12km
 
 #J.o <- 50
 J.o<-87 # placing 158 camera traps on 44 grids of 12km 
@@ -173,14 +174,12 @@ J.o<-87 # placing 158 camera traps on 44 grids of 12km
 
 #X.o <-cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)))
 
-X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA")
-X.s <- select(X.s, V1, V2)
+X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA") %>%  select(V1, V2) 
 X.s <- as.data.frame(X.s/coord.scale)
 X.s <- as.matrix(X.s, dim = c(dim(X.s)[1], 2))
 X.s <- unname(X.s) # removed this to see if it helps with error
 
-X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM")
-X.o <- select(X.o, V1, V2)
+X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM") %>% select(V1, V2)
 X.o <- as.data.frame(X.o/coord.scale)
 X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
 X.o <- unname(X.o)

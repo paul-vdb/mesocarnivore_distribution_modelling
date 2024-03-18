@@ -4,10 +4,6 @@
 ### fit marginal closed model
 ##########################
 
-#.libPaths()
-#.libPaths('C:/Users/CHURTADO/AppData/R') # this is a new path
-#.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
-
 setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 start.time <- Sys.time()
 
