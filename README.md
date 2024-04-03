@@ -17,10 +17,10 @@ The scope of this project includes any record of any of the 18 species of mesoca
 | American marten       | Martes americana   |
 | Pacific marten        | Martes caurina     |
 | Haida ermine          | Mustela haidarum   |
-| Short-tailed weasel   | Mustela erminea    |
+| Short-tailed weasel   | Mustela richardonii|
 | Least weasel          | Mustela nivalis    |
-| Long-tailed weasel    | Mustela frenata    |
-| American mink         | Neovison vison     |
+| Long-tailed weasel    | Neogale frenata    |
+| American mink         | Neogale vison      |
 | American badger       | Taxidea taxus      |
 | Bobcat                | Lynx rufus         |
 | Lynx                  | Lynx canadiensis   |
