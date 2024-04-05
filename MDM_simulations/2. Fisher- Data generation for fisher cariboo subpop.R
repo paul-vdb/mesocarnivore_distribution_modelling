@@ -13,7 +13,8 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
-setwd("C:/LocalR")
+# setwd("C:/LocalR")
+setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
@@ -24,7 +25,8 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 #grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
 
 #A.  density studies 
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+# setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM/1. Master Data")
 
 df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
@@ -88,7 +90,8 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, cariboo ####
 
-setwd("C:/LocalR")
+# setwd("C:/LocalR")
+setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
 subpop <- ms_simplify(subpopulations, keep = 0.001,
@@ -145,12 +148,12 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #population
 # mu <- 50 #density
 # N <- rpois(1, mu*A) #A is Area((xlim[2] - xlim[1]) * (ylim[2] - ylim[1])/10000)
-N <- 500
-M <- N*2 #
-psi <- 0.33 #data augmentation ?
+M <- 1500
+psi <- 0.3 #data augmentation ?
+sigma <- 3 #scale parameter 5km approximate movement of bears 
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
-sigma <- 3 #scale parameter btw 0.5 and 4 for fishers. 
+
 
 #sampling 
 p0.s<-0.3 #detection probability SCR, puntzi lake study

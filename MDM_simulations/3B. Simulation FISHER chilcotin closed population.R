@@ -27,13 +27,13 @@ init_simple <- function() {
   }
   list(z = zi, 
        s = si,
-       p0.S=0.1, p0.O=0.05,
+       p0.S=0.3, p0.O=0.1,
        sigma=3)
 }
 pars <- c("N","psi","p0.S","p0.O","sigma","Never")
 
 for(i in 1:nsims){
-  name.i <- paste("dat.chilcotin_", stub, "_", i, sep = "")
+  name.i <- paste("dat.", stub, "_", i, sep = "")
   obj.i <- get(name.i)
   out.i <- paste("out.", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for first T
@@ -66,18 +66,19 @@ for(i in 1:nsims){
       "margSingle_IM_fisher.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 28,
+      parallel = TRUE, n.cores= 10,
       n.chains = 3,
-      n.burnin = 500,
+      n.burnin = 1000,
       n.adapt = 800,
       n.iter = 3000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "NewNchilcotin_3k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "Dchilcotin_5k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
 end.time <- Sys.time()
 time.taken <- round(end.time - start.time,2)
 time.taken
+
