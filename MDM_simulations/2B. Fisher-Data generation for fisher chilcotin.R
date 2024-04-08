@@ -13,18 +13,17 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
-setwd("C:/LocalR")
+# setwd("C:/LocalR")
+setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
 grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
-#grid_columbian_vect <- vect(grid_columbian) # 3005 albers projection
-# change projection 
-#crslatlong <- "+proj=longlat" 
-#grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
+columbian_area <- ms_simplify(grid_columbian_sf, keep = 0.01, keep_shapes = FALSE)
 
 #A.  density studies 
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+# setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM/1. Master Data")
 
 df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
@@ -34,7 +33,7 @@ plot(DNA_data_sf)
 #B. Camera studies
 
 #check 5937 project as the conversion from UTM to latlong is wrong, zone problem
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+# setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
 cam_df <- read_csv("camera_deployments_11-02c.csv", col_types = cols(Start_Deployment_date = col_date(format = "%Y-%m-%d"), End_Deployment_date = col_date(format = "%Y-%m-%d")))
 cam_df$DATA_TYPE <- "CAM"
@@ -88,7 +87,9 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, chilcotin ####
 
-setwd("C:/LocalR")
+# setwd("C:/LocalR")
+setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
 subpop <- ms_simplify(subpopulations, keep = 0.001,
@@ -244,10 +245,10 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 3
-stub <- "fisher_ICM_chilcotin_newN_"
+nsims <- 5
+stub <- "fisher_ICM_chilcotin_D"
 for(i in 1:nsims) {
-  obj.i <- paste("dat.chilcotin_", stub, "_",i, sep="")
+  obj.i <- paste("dat.", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
