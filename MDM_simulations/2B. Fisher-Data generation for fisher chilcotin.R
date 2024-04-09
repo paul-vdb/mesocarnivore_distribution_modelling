@@ -245,8 +245,8 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 5
-stub <- "fisher_ICM_chilcotin_D"
+nsims <- 12
+stub <- "fisher_ICM_chilcotin_5k_B"
 for(i in 1:nsims) {
   obj.i <- paste("dat.", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
