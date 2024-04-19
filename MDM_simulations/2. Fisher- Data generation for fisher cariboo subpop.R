@@ -14,7 +14,7 @@ library(rmapshaper)
 
 #grid 
 # setwd("C:/LocalR")
-setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
@@ -26,9 +26,9 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 
 #A.  density studies 
 # setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
-setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM/1. Master Data")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
+df <- read_csv("DNA_data_MDB_03-06.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
 df <- subset(df, Project_name != "3289" | Project_name != "Hat Creek" | Project_name != "3269")
 DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
@@ -91,7 +91,7 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 #3. Filter by population, cariboo ####
 
 # setwd("C:/LocalR")
-setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
 subpop <- ms_simplify(subpopulations, keep = 0.001,
@@ -190,14 +190,14 @@ X.o <- unname(X.o)
 #cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma))) # 50 random points within the grid. 2*sigma determines what is not included in the sampling area. here its 10 and 90 are the limits, excluding 20% of cells. Thus the sampling area is 64000
 
 ###data generation ####
-simdata <- function(M, N, psi, p0.s,p0.o, sigma, 
+simdata <- function(M, psi, p0.s,p0.o, sigma, 
                     xlim, ylim, X.s,X.o, K, T) {
   J.s <- nrow(X.s)   # number of SCR traps
   J.o <- nrow(X.o)   # number of PA traps
   s <- array(NA, c(M, 2, T)) # empty array to fill with activity centers, 300 ind, sampled across 4 periods, 2 columns for coordinates. 
   z <- a <- matrix(NA, M, T) # empty matrix for population membership
   s[,,1] <- cbind(runif(M, xlim[1], xlim[2]), runif(M, ylim[1], ylim[2])) # random activity centers
-  z[,1] <- rbinom(N, 1, psi) # changing from M to N, to have N alwasy the same? create first year's pop with M from psi.
+  z[,1] <- rbinom(M, 1, psi) # create first year's pop with M from psi.
   a[,1] <- z[,1]  # recruited in first year if z=1
   # EB <- sum(z[,1])*gamma # Expected number of births
   # delta <- EB / (M-sum(a[,1])) # Divided by number of available recruits
@@ -247,10 +247,10 @@ simdata <- function(M, N, psi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 8
-stub <- "fisher_ICM_cariboo_new"
+stub <- "fisher_ICM_cariboo_3k_A"
 for(i in 1:nsims) {
-  obj.i <- paste("dat.cariboo_", stub, "_",i, sep="")
-  dat.i <- simdata(M=M, N=N, psi=psi, #gamma=gamma, phi=phi,
+  obj.i <- paste("dat.", stub, "_",i, sep="")
+  dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
                    p0.s=p0.s, #
                    p0.o=p0.o, #
                    sigma=sigma,

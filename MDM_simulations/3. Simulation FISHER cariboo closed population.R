@@ -14,10 +14,10 @@ start.time <- Sys.time()
 library(rjags)
 library(jagsUI)
 
-M<-1000
+M<-1500
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1:(4* dim(y)[1])] <- 1 #  zi[1:M)] <- 1 give 1's to indviduals who were detected by SCR
+  zi[1:M] <- 1  #  zi[1:M)] <- 1 give 1's to indviduals who were detected by SCR
   sii <- apply(y, c(1,2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -33,7 +33,7 @@ init_simple <- function() {
 pars <- c("N","psi","p0.S","p0.O","sigma","Never")
 
 for(i in 1:nsims){
-  name.i <- paste("dat.cariboo_", stub, "_", i, sep = "")
+  name.i <- paste("dat.", stub, "_", i, sep = "")
   obj.i <- get(name.i)
   out.i <- paste("out.", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for first T
@@ -66,15 +66,15 @@ for(i in 1:nsims){
       "margSingle_IM_fisher.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 28,
+      parallel = TRUE, n.cores= 5,
       n.chains = 3,
       n.burnin = 1000,
-      n.adapt = 500,
-      n.iter = 5000,
+      n.adapt = 800,
+      n.iter = 3000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "New_N_cariboo_5k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "cariboo_3k_A.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
