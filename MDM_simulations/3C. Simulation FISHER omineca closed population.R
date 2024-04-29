@@ -9,15 +9,16 @@
 #.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
 
 setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
+
 start.time <- Sys.time()
 
 library(rjags)
 library(jagsUI)
 
-M<-300
+M <- 1500
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
-  zi[1:(20* dim(y)[1])] <- 1 # give 1's to indviduals who were detected by SCR
+  zi[1:M] <- 1 #  zi[1:(4* dim(y)[1])] <- 1 give 1's to indviduals who were detected by SCR
   sii <- apply(y, c(1,2), sum)
   si <- cbind(runif(M, xlims[1], xlims[2]),
               runif(M, ylims[1], ylims[2]))
@@ -27,20 +28,19 @@ init_simple <- function() {
   }
   list(z = zi, 
        s = si,
-       p0.S=0.1, p0.O=0.05,
+       p0.S=0.3, p0.O=0.1,
        sigma=3)
 }
 pars <- c("N","psi","p0.S","p0.O","sigma","Never")
 
 for(i in 1:nsims){
-  name.i <- paste("dat.omineca_", stub, "_", i, sep = "")
+  name.i <- paste("dat.", stub, "_", i, sep = "")
   obj.i <- get(name.i)
   out.i <- paste("out.", stub, "_", i, sep = "")
   y <- obj.i$y.s # observed SCR data for first T
   dim.y <- dim(y)
   y.orig <- array(0L, c(dim.y[1] + 1, dim.y[2], dim.y[3]))
-  y.orig [1:nrow(y), , ] <-
-    y # observed data augmented only with 1 row
+  y.orig [1:nrow(y), , ] <- y # observed data augmented only with 1 row
   O <- obj.i$O.o[, , 1]
   X.s <- as.matrix(obj.i$X.s)
   X.o <- as.matrix(obj.i$X.o)
@@ -63,18 +63,18 @@ for(i in 1:nsims){
   )
   out <-
     jags(
-      "margSingle_IM.JAG",
+      "margSingle_IM_fisher.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 18,
+      parallel = TRUE, n.cores= 4,
       n.chains = 3,
-      n.burnin = 2000,
-      n.adapt = 100,
-      n.iter = 5000,
+      n.burnin = 500,
+      n.adapt = 800,
+      n.iter = 3000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, ".Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "fisher_ICM_Omineca_3k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
