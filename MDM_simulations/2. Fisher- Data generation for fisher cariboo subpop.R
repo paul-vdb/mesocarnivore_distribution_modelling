@@ -13,8 +13,8 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
-# setwd("C:/LocalR")
-setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
+setwd("C:/LocalR")
+#setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
@@ -25,8 +25,8 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 #grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
 
 #A.  density studies 
-# setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
-setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
+setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
 
 df <- read_csv("DNA_data_MDB_03-06.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
@@ -90,8 +90,8 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, cariboo ####
 
-# setwd("C:/LocalR")
-setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
+ setwd("C:/LocalR")
+#setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
 subpop <- ms_simplify(subpopulations, keep = 0.001,
@@ -247,7 +247,7 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
               xlims=xlim, ylims=ylim))
 }
 nsims <- 8
-stub <- "fisher_ICM_cariboo_3k_A"
+stub <- "fisher_ICM_cariboo_3k_D1"
 for(i in 1:nsims) {
   obj.i <- paste("dat.", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,

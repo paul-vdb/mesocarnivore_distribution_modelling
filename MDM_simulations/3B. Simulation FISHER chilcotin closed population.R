@@ -69,12 +69,12 @@ for(i in 1:nsims){
       parallel = TRUE, n.cores= 10,
       n.chains = 3,
       n.burnin = 1000,
-      n.adapt = 800,
-      n.iter = 3000,
+      n.adapt = 100,
+      n.iter = 5000,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "Dchilcotin_5k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "chilcotin_5k_A1.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
