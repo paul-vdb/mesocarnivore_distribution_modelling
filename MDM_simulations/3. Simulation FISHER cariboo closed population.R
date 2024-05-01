@@ -27,7 +27,7 @@ init_simple <- function() {
   }
   list(z = zi, 
        s = si,
-       p0.S=0.3, p0.O=0.1,
+       p0.S=0.1, p0.O=0.05,
        sigma=3)
 }
 pars <- c("N","psi","p0.S","p0.O","sigma","Never")
