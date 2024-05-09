@@ -66,7 +66,7 @@ for(i in 1:nsims){
       "margSingle_IM_fisher.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 4,
+      parallel = TRUE, n.cores= 3,
       n.chains = 3,
       n.burnin = 500,
       n.adapt = 800,
@@ -74,7 +74,7 @@ for(i in 1:nsims){
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "fisher_ICM_Omineca_3k.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "fisher_ICM_Omineca3_3k.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 

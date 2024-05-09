@@ -11,8 +11,8 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
- setwd("C:/LocalR")
-#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+#setwd("C:/LocalR")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
@@ -20,10 +20,12 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 columbian_area <- ms_simplify(grid_columbian_sf, keep = 0.01, keep_shapes = FALSE)
 
 #A.  density studies 
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 #setwd("C:/LocalR/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
+
+df <- read_csv("DNA_data_MDB_03-06.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
 #df <- subset(df, Project_name != "3289")
 DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
@@ -31,7 +33,7 @@ plot(DNA_data_sf)
 #B. Camera studies
 
 #check 5937 project as the conversion from UTM to latlong is wrong, zone problem
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
 cam_df <- read_csv("camera_deployments_11-02c.csv", col_types = cols(Start_Deployment_date = col_date(format = "%Y-%m-%d"), End_Deployment_date = col_date(format = "%Y-%m-%d")))
 cam_df$DATA_TYPE <- "CAM"
@@ -85,15 +87,16 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, cariboo ####
 
-setwd("C:/LocalR")
-#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+#setwd("C:/LocalR")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
-subpop <- ms_simplify(subpopulations, keep = 0.001,
+subpop <- ms_simplify(subpopulations, keep = 0.01,
                       keep_shapes = FALSE)
 
 cariboo <- subpop |> dplyr::filter(Subpop == "Cariboo")
+cariboo <- st_buffer(cariboo, 1000)
 
 cameras_cariboo <- st_intersection(cariboo, sites_cam) # no intersection 
 cameras_cariboo_unique <-  cameras_cariboo %>% distinct(MID_3km, .keep_all = TRUE)
@@ -161,7 +164,7 @@ T<-1 # primary sampling periods
 cam_sites <-  Ssites_cariboo2 %>% group_by(DATA_TYPE) %>% summarise(n())
 cam_sites
 #J.s <- 25
-J.s<-366 # placing 1761 hair traps on a 60 grids of 12km
+J.s<-377 # placing 1761 hair traps on a 60 grids of 12km
 
 #J.o <- 50
 J.o<-87 # placing 158 camera traps on 44 grids of 12km 
@@ -243,8 +246,8 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 6
-stub <- "fisher_ICM_cariboo_3k_D5"
+nsims <- 7
+stub <- "fisher_ICM_cariboo_3k_D9"
 for(i in 1:nsims) {
   obj.i <- paste("dat.", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,

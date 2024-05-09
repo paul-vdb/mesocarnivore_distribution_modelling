@@ -11,8 +11,8 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
- setwd("C:/LocalR")
-#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+#setwd("C:/LocalR")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
@@ -20,10 +20,11 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 columbian_area <- ms_simplify(grid_columbian_sf, keep = 0.01, keep_shapes = FALSE)
 
 #A.  density studies 
-# setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
-setwd("C:/LocalR/1. Master Data")
+#setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("C:/LocalR/1. Master Data")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
 
-df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
+df <- read_csv("DNA_data_MDB_03-06.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
 #df <- subset(df, Project_name != "3289")
 DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
@@ -85,8 +86,8 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, omineca ####
 
-setwd("C:/LocalR")
-#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+#setwd("C:/LocalR")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
@@ -243,8 +244,8 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 1
-stub <- "fisher_ICM_omineca_3k"
+nsims <- 10
+stub <- "fisher_ICM_ominecaB_3k"
 for(i in 1:nsims) {
   obj.i <- paste("dat.", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
