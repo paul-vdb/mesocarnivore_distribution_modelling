@@ -27,7 +27,7 @@ init_simple <- function() {
   }
   list(z = zi, 
        s = si,
-       p0.S=0.1, p0.O=0.05,
+       p0.S=0.1, p0.O=0.1,
        sigma=3)
 }
 pars <- c("N","psi","p0.S","p0.O","sigma","Never")
@@ -66,7 +66,7 @@ for(i in 1:nsims){
       "margSingle_IM_fisher.JAG",
       data = jdat.i,
       inits = init_simple,
-      parallel = TRUE, n.cores= 5,
+      parallel = TRUE, n.cores= 3,
       n.chains = 3,
       n.burnin = 1000,
       n.adapt = 800,
@@ -74,7 +74,7 @@ for(i in 1:nsims){
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "cariboo_3k_D2.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "cariboo_3k_D5.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
