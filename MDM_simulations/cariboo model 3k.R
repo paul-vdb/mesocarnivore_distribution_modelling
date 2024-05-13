@@ -3,8 +3,6 @@ library(ggplot2)
 library(sf)
 library(readr)
 library(farver)
-library(ggplot2)
-library(rmapshaper)
 library(stars)
 library(tidyterra)
 library(dplyr)
@@ -13,30 +11,29 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
-setwd("C:/LocalR")
-#setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
+#setwd("C:/LocalR")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
 grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
-#grid_columbian_vect <- vect(grid_columbian) # 3005 albers projection
-# change projection 
-#crslatlong <- "+proj=longlat" 
-#grid_columbian_dec <- terra::project(grid_columbian_vect, crslatlong)
+columbian_area <- ms_simplify(grid_columbian_sf, keep = 0.01, keep_shapes = FALSE)
 
 #A.  density studies 
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
-#setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
+#setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("C:/LocalR/1. Master Data")
+
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM/1. Master Data")
 
 df <- read_csv("DNA_data_MDB_03-06.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
-df <- subset(df, Project_name != "3289" | Project_name != "Hat Creek" | Project_name != "3269")
+#df <- subset(df, Project_name != "3289")
 DNA_data_sf <-  df %>% drop_na(Latitude_DD, Longitude_DD) %>% sf::st_as_sf(., coords= c("Longitude_DD", "Latitude_DD"), crs=4326, remove= FALSE) %>% st_transform(., crs=3005)
 plot(DNA_data_sf)
 #B. Camera studies
 
 #check 5937 project as the conversion from UTM to latlong is wrong, zone problem
-setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
 
 cam_df <- read_csv("camera_deployments_11-02c.csv", col_types = cols(Start_Deployment_date = col_date(format = "%Y-%m-%d"), End_Deployment_date = col_date(format = "%Y-%m-%d")))
 cam_df$DATA_TYPE <- "CAM"
@@ -56,7 +53,7 @@ cameras_grid <- st_intersection(Camera_data_sf, grid_sf)
 #cameras_grid3 <- st_collection_extract(cameras_grid, "POLYGON")
 #intersections_lp <- st_intersection(Camera_data_sf_albers, grid_columbian_sf)
 academics_grid <- st_intersection(MDM_academics_sf, grid_sf)
-DNA_grid <- st_intersection(DNA_data_sf, grid_sf) %>% subset(Project_name != "Hat Creek" | Project_name != "3269")
+DNA_grid <- st_intersection(DNA_data_sf, grid_sf)
 
 sites_cam <- bind_rows(academics_grid, cameras_grid) 
 
@@ -90,20 +87,23 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, cariboo ####
 
- setwd("C:/LocalR")
-#setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
+#setwd("C:/LocalR")
+setwd("C:/Users/cindy.hurtado/OneDrive - Government of BC/VM")
+
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
-subpop <- ms_simplify(subpopulations, keep = 0.001,
+subpop <- ms_simplify(subpopulations, keep = 0.01,
                       keep_shapes = FALSE)
 
 cariboo <- subpop |> dplyr::filter(Subpop == "Cariboo")
+cariboo <- st_buffer(cariboo, 1000)
 
 cameras_cariboo <- st_intersection(cariboo, sites_cam) # no intersection 
 cameras_cariboo_unique <-  cameras_cariboo %>% distinct(MID_3km, .keep_all = TRUE)
 DNA_cariboo <- st_intersection(cariboo, DNA_grid) # reducing smapling sites to grid cell of 12km
 DNA_cariboo_unique <-  DNA_cariboo %>% distinct(MID_3km, .keep_all = TRUE) # reducing smapling sites to grid cell of 12km
-sites_cariboo <- bind_rows(cameras_cariboo_unique, DNA_cariboo_unique) 
+DNA_cariboo_unique$Habitat_type <- as.character(DNA_cariboo_unique$Habitat_type)
+sites_cariboo <- bind_rows(cameras_cariboo_unique, DNA_cariboo_unique)
 
 plot1 = ggplot() +
   #geom_sf(data = grid_sf, fill= NA)+
@@ -146,14 +146,12 @@ ylim <- c(min(traps.scale$V2)+2, max(traps.scale$V2)+2)
 #rect(xlim[1], ylim[1], xlim[2], ylim[2], col=alpha('grey', 0.3), border=NA)
 
 #population
-# mu <- 50 #density
-# N <- rpois(1, mu*A) #A is Area((xlim[2] - xlim[1]) * (ylim[2] - ylim[1])/10000)
+
 M <- 1500
 psi <- 0.3 #data augmentation ?
-sigma <- 3 #scale parameter 5km approximate movement of bears 
 gamma <-0.2 # per capita recruitment rate
 phi <- 0.8 #survival probability from t-1 to t. 
-
+sigma <- 3 #scale parameter 5km approximate movement of bears 
 
 #sampling 
 p0.s<-0.3 #detection probability SCR, puntzi lake study
@@ -166,7 +164,7 @@ T<-1 # primary sampling periods
 cam_sites <-  Ssites_cariboo2 %>% group_by(DATA_TYPE) %>% summarise(n())
 cam_sites
 #J.s <- 25
-J.s<-366 # placing 1761 hair traps on a 60 grids of 12km
+J.s<-377 # placing 1761 hair traps on a 60 grids of 12km
 
 #J.o <- 50
 J.o<-87 # placing 158 camera traps on 44 grids of 12km 
@@ -177,12 +175,14 @@ J.o<-87 # placing 158 camera traps on 44 grids of 12km
 
 #X.o <-cbind(runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)),runif(J.o, (xlim[1]+2*sigma), (xlim[2]-2*sigma)))
 
-X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA") %>%  select(V1, V2) 
+X.s <- subset(Ssites_cariboo2, DATA_TYPE== "DNA")
+X.s <- select(X.s, V1, V2)
 X.s <- as.data.frame(X.s/coord.scale)
 X.s <- as.matrix(X.s, dim = c(dim(X.s)[1], 2))
 X.s <- unname(X.s) # removed this to see if it helps with error
 
-X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM") %>% select(V1, V2)
+X.o <- subset(Ssites_cariboo2, DATA_TYPE== "CAM")
+X.o <- select(X.o, V1, V2)
 X.o <- as.data.frame(X.o/coord.scale)
 X.o <- as.matrix(X.o, dim = c(dim(X.o)[1], 2))
 X.o <- unname(X.o)
@@ -246,8 +246,8 @@ simdata <- function(M, psi, p0.s,p0.o, sigma,
   return(list(yall.s=yall.s, yall.o=yall.o,y.s=y.s, O.s=O.s,y.o=y.o, O.o=O.o, z=z, s=s, X.s=X.s,X.o=X.o,
               xlims=xlim, ylims=ylim))
 }
-nsims <- 8
-stub <- "fisher_ICM_cariboo_3k_D3"
+nsims <- 7
+stub <- "fisher_ICM_cariboo_3k_D9"
 for(i in 1:nsims) {
   obj.i <- paste("dat.", stub, "_",i, sep="")
   dat.i <- simdata(M=M, psi=psi, #gamma=gamma, phi=phi,
