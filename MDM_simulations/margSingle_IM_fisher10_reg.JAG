@@ -12,13 +12,15 @@ data{
       }}} 
 }
 model{
-  psi ~ dbeta(1,1)    # M*psi = E[N(1)]
+  psi[1] ~ dbeta(1,1)
+  psi[2] ~ dbeta(1,1)
+  psi[3] ~ dbeta(1,1) # M*psi = E[N(1)]
   p0.S ~ dbeta(1,1)
   p0.O ~ dbeta(1,1)
   sigma ~ dgamma(6, 4) # followed burgar et. al. 2018 for calculations, 5 to 300km2
 
   for(i in 1:M) {
-    z[i,1] ~ dbern(psi[P_ID[i]])  ##the individual i is part of superpopulation M according to the Rit-specific psi.
+    z[i,1] ~ dbern(psi[P_ID[i]])  ##the individual i is part of superpopulation M according to the PID-specific psi.
     #a[i,1] <- z[i,1] # recruited yet?
     s[i,1] ~ dunif(xlims[1], xlims[2])
     s[i,2] ~ dunif(ylims[1], ylims[2])
@@ -65,11 +67,15 @@ model{
   }#j.o
   
   A<-sum(habmat)
+  
   Never <- sum(zi[]) # Bears ever alive
   
     for(t in 1:T) { #(T-1)) {
+    for (b in 1:3){
     #N[t] <- sum(z[,t])     
-    N[t] <- sum(z[,P_ID_dummy[,t]])
-    D[t] <- (N[t]/A)
+     N_sum[t] <- sum(z[1:M, t])
+     N[b] <-  inprod(z[1:M,t],P_ID_dummy[,b]) # this t is population ID
+     D[t] <- (N_sum[t]/A)
+    } #b
   }
 } 
