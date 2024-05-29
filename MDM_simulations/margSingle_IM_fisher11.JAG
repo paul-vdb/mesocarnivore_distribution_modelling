@@ -25,14 +25,15 @@ model{
     s[i,1] ~ dunif(xlims[1], xlims[2])
     s[i,2] ~ dunif(ylims[1], ylims[2])
     
-    #habmat this is the "habitat" mask stuff across the statespace. Values in the habitat mask can be     #0 up to the number of populations you are modeling
-    #0 means it is not habitat at all, 1 up to the number of pops defines what population/area that       #statespace shall belong to
+    #habmat this is the "habitat" mask stuff across the statespace. Values in the habitat #mask can be     #0 up to the number of populations you are modeling
+    #0 means it is not habitat at all, 1 up to the number of pops defines what population
+    #/area that       #statespace shall belong to
     #ppOK gets the habitat mask value at the individual's location
-    #which population each observed indivdiual is from must be known, and provided to the model as        #data. here, in ritidNP
+    #which population each observed indivdiual is from must be known, and provided to the #model as        #data. here, in ritidNP
     
-    ppOk[i] <- habmat[trunc(s[i,1]), trunc(s[i,2])] # habitat check. does this pixel have a 0 or a ritland number? not hab or hab
+    #ppOk[i] <- habmat[trunc(s[i,1]), trunc(s[i,2])] # habitat check. does this pixel have a #0 or a ritland number? not hab or hab
     
-    pOk[i] <- ifelse(ppOk[i]==P_ID[i],1,0) # P_ID is a matrix that assigns 1 to members of the subpopulation and 0 to non-members
+    pOk[i] <- ifelse( habmat[trunc(s[i,1]), trunc(s[i,2])] ==P_ID[i],1,0) # P_ID is a matrix that assigns 1 to members of the subpopulation and 0 to non-members
     
     OK[i] ~ dbern(pOk[i])  
     
@@ -66,7 +67,7 @@ model{
     }#k
   }#j.o
   
-  A<-sum(habmat)
+  #A<-sum(habmat)
   
   Never <- sum(zi[]) # Bears ever alive
   
