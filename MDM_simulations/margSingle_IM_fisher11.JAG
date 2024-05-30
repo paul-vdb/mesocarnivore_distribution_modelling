@@ -72,9 +72,12 @@ model{
   Never <- sum(zi[]) # Bears ever alive
   
     for(t in 1:T) { #(T-1)) {
-    for (b in 1:3){
+    
     #N[t] <- sum(z[,t])     
-     N_sum[t] <- sum(z[1:M, t])
+    #N_sum[t] <- sum(z[, t]) # same as bears ever alive?
+     
+    for (b in 1:3){
+    
      N[b] <-  inprod(z[1:M,t],P_ID_dummy[,b]) # this t is population ID
      #D[t] <- (N_sum[t]/A)
     } #b
