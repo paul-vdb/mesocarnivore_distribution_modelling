@@ -13,10 +13,11 @@ setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 
 #1. Read files with simulations
 
-file_list <- list.files("VM_simulations_chilcotin",  full.names="TRUE")
-#file_list <- list.files("VM_simulation_chilcotin_5k",  full.names="TRUE")
+file_list3k <- list.files("VM_simulations_chilcotin",  full.names="TRUE")
+file_list5k <- list.files("VM_simulation_chilcotin_5k",  full.names="TRUE")
 
 #file_list <- list.files("VM_simulations_cariboo",  full.names="TRUE")
+file_list <- list.files("VM_simulations_omineca",  full.names="TRUE")
 
 # this loops read the 1 object saved in each simulations, no more objects can be saved in that Rdata file or it will get one at random 
 
@@ -29,8 +30,8 @@ load_obj <- function(f)
 
 #list of all simulations for chilcotin
 
-chilcotin.sim <- lapply(file_list, load_obj)
-
+chilcotin.sim3k <- lapply(file_list3k, load_obj)
+chilcotin.sim5k <- lapply(file_list5k, load_obj)
 # Check if M is enough by looking at N.ever alive output
 # Change p.o and p.s init parameters to 0.05
 # simulate with fisher parameters and lower p.o and p.s
@@ -58,14 +59,17 @@ for(i in 1:length(chilcotin.sim)) {
 
 # to create only one graph with all simulations 
 
-N.df_all <- purrr::map_df(N.df, data.frame, .id = 'name')
-N.df_all$group <- paste("3k", N.df_all$name)
+# N.df_all <- purrr::map_df(N.df, data.frame, .id = 'name')
+#  N.df_all$group <- paste("3k", N.df_all$name)
 
 ## run above again for N.df_all2
-N.df_all2 <- purrr::map_df(N.df, data.frame, .id = 'name') ## comparison 
-N.df_all2$group <- paste("5k", N.df_all2$name)
+# N.df_all2 <- purrr::map_df(N.df, data.frame, .id = 'name') ## comparison 
+# N.df_all2$group <- paste("C", N.df_all2$name)
 
-N.df_all <- bind_rows(N.df_all, N.df_all2)
+N.df_all3 <- purrr::map_df(N.df, data.frame, .id = 'name') ## comparison 
+N.df_all3$group <- paste("O", N.df_all3$name)
+
+N.df_all <- bind_rows(N.df_all, N.df_all2, N.df_all3)
 
 chilcotin_3k_simulations <- ggplot(N.df_all, aes(x = group, y= N))+ geom_violin() + geom_hline(yintercept=500, linetype="dashed",  color = "red", size=1) + ylab("Pop. estimate")+ xlab("Simulations") + theme( axis.text.x=element_blank())
 
@@ -137,14 +141,23 @@ jags.View(model)
 
 #3. rough plot of parameters 
 
-trace.list <- list()
+trace.list3k <- list()
 
-for(i in 1:length(chilcotin.sim)) {    
 
-  trace.list[[i]] <-traceplot(chilcotin.sim[[i]] ,param= c("p0.S", "N", "p0.O", "psi"))
+for(i in 1:length(chilcotin.sim3k)) {    
+
+  trace.list3k[[i]] <-traceplot(chilcotin.sim3k[[i]] ,param = "N")} 
+
+#lapply(trace.list3k,function(x){ggsave(file=paste(x,"pdf",sep="."),get(x))})
+
+#c("p0.S", "N", "p0.O", "psi"))
+
+trace.list5k <- list()
+
+for(i in 1:length(chilcotin.sim5k)) {    
+  
+  trace.list5k[[i]] <-traceplot(chilcotin.sim5k[[i]] ,param= "N")
 }
-
-
 
 
 
@@ -211,3 +224,5 @@ grid.arrange(grobs= plot, ncol=3)
 
 
 plot1
+
+

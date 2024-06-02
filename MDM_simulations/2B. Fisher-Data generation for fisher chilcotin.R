@@ -13,8 +13,8 @@ library(rmapshaper)
 #1. Read and plot layers ####
 
 #grid 
-# setwd("C:/LocalR")
-setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+ setwd("C:/LocalR")
+#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
 meso_grid <- st_read("BC_meso_grid.shp")
 grid_sf <-  sf::st_as_sf(meso_grid)
 grid_columbian <- st_read("BC_meso_grid_columbian.shp")
@@ -22,8 +22,8 @@ grid_columbian_sf <-  sf::st_as_sf(grid_columbian)
 columbian_area <- ms_simplify(grid_columbian_sf, keep = 0.01, keep_shapes = FALSE)
 
 #A.  density studies 
-# setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
-setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM/1. Master Data")
+ setwd("I:/Ecosystems/Conservation Science/Species Conservation Science/Mesocarnivores/Projects/Mesocarnivore_Monitoring_Program/2.Data/Mesocarnivores DB/1. Master Data")
+#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM/1. Master Data")
 
 df <- read_csv("DNA_data_MDB_02-29.csv") # file with all density studies 
 df$DATA_TYPE <- "DNA"
@@ -87,8 +87,8 @@ sites_cam <- bind_rows(academics_grid, cameras_grid)
 
 #3. Filter by population, chilcotin ####
 
-# setwd("C:/LocalR")
-setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
+setwd("C:/LocalR")
+#setwd("C:/Users/cindyhurtado/OneDrive - Government of BC/VM")
 
 subpopulations <- sf::st_read("BC_Fisher_populations_2024.gdb", layer = "Subpopulations")
 
@@ -105,6 +105,7 @@ DNA_chilcotin_unique$Habitat_type <- as.character(DNA_chilcotin_unique$Habitat_t
 sites_chilcotin <- bind_rows(cameras_chilcotin_unique, DNA_chilcotin_unique)
 
 plot1 = ggplot() +
+  geom_sf(data = chilcotin)+
   #geom_sf(data = grid_sf, fill= NA)+
   # geom_sf(data = DNA_chilcotin, color= 'green')+
   geom_sf(data = DNA_chilcotin_unique, color= 'red')+
