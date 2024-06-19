@@ -75,7 +75,7 @@ model{
     #N[t] <- sum(z[,t])     
      N_sum[t] <- sum(z[1:M, t])
      N[b] <-  inprod(z[1:M,t],P_ID_dummy[,b]) # this t is population ID
-     D[t] <- (N_sum[t]/A)
+     #D[t] <- (N_sum[t]/A)
     } #b
   }
 } 
