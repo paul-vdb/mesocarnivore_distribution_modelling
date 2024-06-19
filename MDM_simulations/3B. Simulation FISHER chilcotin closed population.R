@@ -1,4 +1,3 @@
-### Fit various models for chilcotin subpopulation
 
 ##########################
 ### fit marginal closed model
