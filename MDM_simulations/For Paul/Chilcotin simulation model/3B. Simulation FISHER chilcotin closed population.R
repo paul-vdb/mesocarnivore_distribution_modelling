@@ -7,7 +7,7 @@
 #.libPaths('C:/Users/CHURTADO/AppData/R') # this is a new path
 #.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
 
-setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/For Paul/Chilcotin simulation model")
 start.time <- Sys.time()
 
 library(rjags)
@@ -67,13 +67,13 @@ for(i in 1:nsims){
       inits = init_simple,
       parallel = TRUE, n.cores= 10,
       n.chains = 3,
-      n.burnin = 1000,
-      n.adapt = 100,
-      n.iter = 5000,
+      n.burnin = 10,
+      n.adapt = 10,
+      n.iter = 50,
       parameters.to.save = pars
     )
   assign(out.i, out)
-  save(list = out.i, file = paste(out.i, "chilcotin_5k_A1.Rdata", sep = ""))
+  save(list = out.i, file = paste(out.i, "test1.Rdata", sep = ""))
   rm(name.i, obj.i, out.i, out)
 }
 
