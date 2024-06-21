@@ -749,10 +749,10 @@ n.occ.s1 <- DNA_columbian_3k %>%
           dplyr::summarise(N_occ= max(occasion)) %>% 
           st_drop_geometry()
 n.occ.s <- n.occ.s1[,2]
-n.occ.s <- as.numeric(n.occ.s$N_occ)
+nocc.s <- as.matrix(n.occ.s1$N_occ)
 
 n.occ.o <- rowSums(O.o2, na.rm=TRUE)
-
+nocc.o <- as.matrix(n.occ.o)
 
 
 ## other variables needed for the model 
@@ -775,4 +775,14 @@ dim(Y.s)
 
 # Run the function!
 #results = process_data()
+y.binom <- Y.s[,,1]+ Y.s[,,2]+ Y.s[,,3]+ Y.s[,,4]
+y.binom[y.binom>0] <- 1
+
+
+O.binom <- O[,,1]
+O.binom <- rowSums(O.binom, na.rm=TRUE)
+#O.binom[O.binom>0] <- 1
+
+O.binom2 <- as.numeric(O.binom)
+
 
