@@ -14,13 +14,14 @@ library(rjags)
 library(jagsUI)
 
 stub <- "cariboo_bern"
+nsims <- 1
 
 M <- 1500
 init_simple <- function() {
   zi <- matrix(0L, M, jdat.i$T)
   zi[1:M] <- 1 #  zi[1:(4* dim(y)[1])] <- 1 give 1's to indviduals who were detected by SCR
   sii <- apply(y, c(1,2), sum)
-  si <- cbind(runif(M, xlims[1], xlims[2]),
+  si <- cbind(runif(M, xlim[1], xlim[2]),
               runif(M, ylims[1], ylims[2]))
   for(i in 1:nrow(sii)) {
     si[i,1] <- mean(X.s[sii[i,] > 0, 1])
@@ -45,8 +46,8 @@ for(i in 1:nsims){
   O <- O.o
   X.s <- as.matrix(X.s)
   X.o <- as.matrix(X.o)
-  xlims <- xlims
-  ylims <- ylims
+  xlims <- xlim
+  ylims <- ylim
   jdat.i <- list(
     y.orig = y.orig,
     n = nrow(y.orig) - 1,
@@ -60,7 +61,7 @@ for(i in 1:nsims){
     K = dim.y[3],
     K.o= dim(O)[2],
     T = 1,
-    xlims = xlims,
+    xlims = xlim,
     ylims = ylims
   )
   out <-
