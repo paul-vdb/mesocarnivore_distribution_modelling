@@ -7,17 +7,14 @@ library(grid)
 library(gridExtra)
 library(miceadds)
 
-setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/2. Outputs")
 
 #Chilcotin 3k-5k simulations ####
 
 #1. Read files with simulations
 
-file_list3k <- list.files("VM_simulations_chilcotin",  full.names="TRUE")
+file_list3k <- list.files("VM_simulations_chilcotin_3k",  full.names="TRUE")
 file_list5k <- list.files("VM_simulation_chilcotin_5k",  full.names="TRUE")
-
-#file_list <- list.files("VM_simulations_cariboo",  full.names="TRUE")
-file_list <- list.files("VM_simulations_omineca",  full.names="TRUE")
 
 # this loops read the 1 object saved in each simulations, no more objects can be saved in that Rdata file or it will get one at random 
 
@@ -38,42 +35,37 @@ chilcotin.sim5k <- lapply(file_list5k, load_obj)
 
 #1. Select the model 
 
-#M= 500
+#Abundance <- list()
+N.df_3k <- list()
+plots_3k <- list()
 
-# cariboo.list[[3]]  <- out.fisher_ICM_3
-# cariboo.list[[4]]  <- out.fisher_ICM_4
-# cariboo.list[[5]]  <- out.fisher_ICM_5
-# #cariboo.list[[6]]  <- out.fisher_ICM_chilcotin_newN__1
-
-# chilcotin.sim[[19]] <- out.fisher_ICM_chilcotin_newN_C_1
-
-Abundance <- list()
-N.df <- list()
-plots <- list()
-
-for(i in 1:length(chilcotin.sim)) {    
-  N.df[[i]] <- as.data.frame(chilcotin.sim[[i]]$sims.list$N)
-  colnames(N.df[[i]]) <- "N"
-  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+for(i in 1:length(chilcotin.sim3k)) {    
+  N.df_3k[[i]] <- as.data.frame(chilcotin.sim3k[[i]]$sims.list$N)
+  colnames(N.df_3k[[i]]) <- "N"
   }
 
-# to create only one graph with all simulations 
+N.df_all3k <- purrr::map_df(N.df_3k, data.frame, .id = 'name') ## comparison 
+N.df_all3k$group <- paste("3k-", N.df_all3k$name)
 
-# N.df_all <- purrr::map_df(N.df, data.frame, .id = 'name')
-#  N.df_all$group <- paste("3k", N.df_all$name)
+## 5k chilcotin simulations
 
-## run above again for N.df_all2
-# N.df_all2 <- purrr::map_df(N.df, data.frame, .id = 'name') ## comparison 
-# N.df_all2$group <- paste("C", N.df_all2$name)
+N.df_5k <- list()
+plots_5k <- list()
 
-N.df_all3 <- purrr::map_df(N.df, data.frame, .id = 'name') ## comparison 
-N.df_all3$group <- paste("O", N.df_all3$name)
+for(i in 1:length(chilcotin.sim5k)) {    
+  N.df_5k[[i]] <- as.data.frame(chilcotin.sim5k[[i]]$sims.list$N)
+  colnames(N.df_5k[[i]]) <- "N"
+}
 
-N.df_all <- bind_rows(N.df_all, N.df_all2, N.df_all3)
+N.df_all5k <- purrr::map_df(N.df_5k, data.frame, .id = 'name') ## comparison 
+N.df_all5k$group <- paste("5k-", N.df_all5k$name)
 
-chilcotin_3k_simulations <- ggplot(N.df_all, aes(x = group, y= N))+ geom_violin() + geom_hline(yintercept=500, linetype="dashed",  color = "red", size=1) + ylab("Pop. estimate")+ xlab("Simulations") + theme( axis.text.x=element_blank())
 
-chilcotin_3k_simulations
+N.df_ch_all <- bind_rows(N.df_all3k, N.df_all5k)
+
+chilcotin_simulations <- ggplot(N.df_ch_all, aes(x = group, y= N))+ geom_violin() + geom_hline(yintercept=500, linetype="dashed",  color = "red", size=1) + ylab("Pop. estimate")+ xlab("Simulations") #+ theme( axis.text.x=element_blank())
+
+chilcotin_simulations+ coord_flip()
 
 
 ## plot psi
@@ -114,6 +106,270 @@ for(i in 1:length(chilcotin.sim)) {
 sigma_all <- purrr::map_df(sigma.df, data.frame, .id = 'name')
 sigma_all_plot <- ggplot(sigma_all, aes(x = reorder(name, sort(as.numeric(name))), y= sigma))+ geom_violin() + geom_hline(yintercept=3, linetype="dashed",  color = "red", size=1) + ylab("sigma")+ xlab("Simulations") #+ theme( axis.text.x=element_blank())
 sigma_all_plot
+
+# Sampling design simulations ####
+
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/2. Outputs")
+
+#1. Read files with simulations
+
+scenario1_hair_filelist <- list.files("Simulation scenario1-hair",  full.names="TRUE")
+Scenario2_cam_filelist  <- list.files("Simulation scenario2-cam",  full.names="TRUE")
+Scenario3_haircam_filelist  <- list.files("Simulation scenario3-haircam",  full.names="TRUE")
+
+# this loops read the 1 object saved in each simulations, no more objects can be saved in that Rdata file or it will get one at random 
+
+load_obj <- function(f)
+{
+  env <- new.env()
+  nm <- load(f, env)[1]
+  env[[nm]]
+}
+
+#list of all simulations for chilcotin
+
+scenario1 <- lapply(scenario1_hair_filelist, load_obj)
+scenario2 <- lapply(Scenario2_cam_filelist, load_obj)
+scenario3 <- lapply(Scenario3_haircam_filelist, load_obj)
+
+#2. Violin plots
+
+#Scenario 1
+#Abundance_S1 <- list()
+N.df_S1 <- list()
+plots_S1 <- list()
+
+for(i in 1:length(scenario1)) {    
+  N.df_S1[[i]] <- as.data.frame(scenario1[[i]]$sims.list$N)
+  colnames(N.df_S1[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_S1 <- purrr::map_df(N.df_S1, data.frame, .id = 'name') ## comparison 
+N.df_all_S1$group <- paste("S1-", N.df_all_S1$name)
+
+#Scenario 2
+
+N.df_S2 <- list()
+plots_S2 <- list()
+
+for(i in 1:length(scenario2)) {    
+  N.df_S2[[i]] <- as.data.frame(scenario2[[i]]$sims.list$N)
+  colnames(N.df_S2[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_S2 <- purrr::map_df(N.df_S2, data.frame, .id = 'name') ## comparison 
+N.df_all_S2$group <- paste("S2-", N.df_all_S2$name)
+
+#Scenario 3
+
+N.df_S3 <- list()
+plots_S3 <- list()
+
+for(i in 1:length(scenario3)) {    
+  N.df_S3[[i]] <- as.data.frame(scenario3[[i]]$sims.list$N)
+  colnames(N.df_S3[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_S3 <- purrr::map_df(N.df_S3, data.frame, .id = 'name') ## comparison 
+N.df_all_S3$group <- paste("S3-", N.df_all_S3$name)
+
+N.df_all <- bind_rows(N.df_all_S1, N.df_all_S2) #N.df_all_S3)
+
+scenario_simulations <- ggplot(N.df_all, aes(x = group, y= N))+ geom_violin() + geom_hline(yintercept=500, linetype="dashed",  color = "red", linewidth=1) + ylab("Pop. estimate")+ xlab("Simulations")
+
++ theme( axis.text.x=element_blank())
+
+scenario_simulations
+
+# Conservation Regions simulations ####
+
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/2. Outputs")
+
+#1. Read files with simulations
+
+filelist_CH <- list.files("VM_simulations_chilcotin_3k",  full.names="TRUE")
+filelist_CA  <- list.files("VM_simulations_cariboo_3k",  full.names="TRUE")
+filelist_OM  <- list.files("VM_simulations_omineca_3k",  full.names="TRUE")
+
+# this loops read the 1 object saved in each simulations, no more objects can be saved in that Rdata file or it will get one at random 
+
+load_obj <- function(f)
+{
+  env <- new.env()
+  nm <- load(f, env)[1]
+  env[[nm]]
+}
+
+#list of all simulations for chilcotin
+
+chilcotin <- lapply(filelist_CH, load_obj)
+cariboo <- lapply(filelist_CA, load_obj)
+omineca <- lapply(filelist_OM, load_obj)
+
+#2. Violin plots
+
+#Chilcotin
+
+N.df_CH <- list()
+
+for(i in 1:length(chilcotin)) {    
+  N.df_CH[[i]] <- as.data.frame(chilcotin[[i]]$sims.list$N)
+  colnames(N.df_CH[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_CH <- purrr::map_df(N.df_CH, data.frame, .id = 'name') ## comparison 
+N.df_all_CH$group <- paste("CH-", N.df_all_CH$name)
+
+#Cariboo
+N.df_CA <- list()
+
+for(i in 1:length(cariboo)) {    
+  N.df_CA[[i]] <- as.data.frame(cariboo[[i]]$sims.list$N)
+  colnames(N.df_CA[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_CA <- purrr::map_df(N.df_CA, data.frame, .id = 'name') ## comparison 
+N.df_all_CA$group <- paste("CA-", N.df_all_CA$name)
+
+
+#Omineca
+
+N.df_OM <- list()
+
+for(i in 1:length(omineca)) {    
+  N.df_OM[[i]] <- as.data.frame(omineca[[i]]$sims.list$N)
+  colnames(N.df_OM[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_OM <- purrr::map_df(N.df_OM, data.frame, .id = 'name') ## comparison 
+N.df_all_OM$group <- paste("OM-", N.df_all_OM$name)
+
+
+N.df_all_CR <- bind_rows(N.df_all_CH, N.df_all_CA,N.df_all_OM ) #N.df_all_S3)
+
+CR_simulations <- ggplot(N.df_all_CR, aes(x = group, y= N))+ geom_violin() + geom_hline(yintercept=500, linetype="dashed",  color = "red", linewidth=1) + ylab("Pop. estimate")+ xlab("Simulations")
+
+#+ theme( axis.text.x=element_blank())
+
+CR_simulations + coord_flip()
+
+# Detection probability changes ####
+
+setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/2. Outputs")
+
+#1. Read files with simulations
+
+filelist_D03 <- list.files("VM_simulation_chilcotin_5k",  full.names="TRUE")
+filelist_D01 <- list.files("Detection_prob_01",  full.names="TRUE")
+filelist_D05  <- list.files("Detection_prob_05",  full.names="TRUE")
+
+# this loops read the 1 object saved in each simulations, no more objects can be saved in that Rdata file or it will get one at random 
+
+load_obj <- function(f)
+{
+  env <- new.env()
+  nm <- load(f, env)[1]
+  env[[nm]]
+}
+
+#list of all simulations for chilcotin
+
+chilcotin_03 <- lapply(filelist_D03, load_obj)
+chilcotin_01 <- lapply(filelist_D01, load_obj)
+chilcotin_05 <- lapply(filelist_D05, load_obj)
+
+#2. Violin plots
+
+#Chilcotin 03
+
+N.df_03 <- list()
+
+for(i in 1:length(chilcotin_03)) {    
+  N.df_03[[i]] <- as.data.frame(chilcotin_03[[i]]$sims.list$N)
+  colnames(N.df_03[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+
+N.df_all_03 <- purrr::map_df(N.df_03, data.frame, .id = 'name') ## comparison 
+N.df_all_03$group <- paste("03-", N.df_all_03$name)
+
+firsts <- c("03- 1",  "03- 3",  "03- 5",  "03- 7" , "03- 9",  "03- 11","03- 13",  "03- 15"," 3-17", "3-019")
+N.df_all_03b <- N.df_all_03%>% filter(group %in% firsts)
+
+
+#Chilcotin 01
+
+N.df_01 <- list()
+
+for(i in 1:length(chilcotin_01)) {    
+  N.df_01[[i]] <- as.data.frame(chilcotin_01[[i]]$sims.list$N)
+  colnames(N.df_01[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_01 <- purrr::map_df(N.df_01, data.frame, .id = 'name') ## comparison 
+N.df_all_01$group <- paste("01-", N.df_all_01$name)
+
+#Chilcotin 05
+
+N.df_05 <- list()
+
+for(i in 1:length(chilcotin_05)) {    
+  N.df_05[[i]] <- as.data.frame(chilcotin_05[[i]]$sims.list$N)
+  colnames(N.df_05[[i]]) <- "N"
+  #Abundance[[i]] <- N.df[[i]] %>% pivot_longer(cols = N)
+}
+
+N.df_all_05 <- purrr::map_df(N.df_05, data.frame, .id = 'name') ## comparison 
+N.df_all_05$group <- paste("05-", N.df_all_05$name)
+
+N.df_all_DP <- bind_rows(N.df_all_01, N.df_all_03b,N.df_all_05 ) 
+
+CR_simulations_DP <- ggplot(N.df_all_DP, aes(x = group, y= N))+ geom_violin() + geom_hline(yintercept=500, linetype="dashed",  color = "red", linewidth=1) + ylab("Pop. estimate")+ xlab("Simulations")
+
+#+ theme( axis.text.x=element_blank())
+
+CR_simulations_DP + coord_flip()
+
+
+
+#3. To look at traceplots in the plots windows 
+
+trace.list_S1 <- list()
+
+
+for(i in 1:length(scenario1)) {    
+  
+  trace.list_S1[[i]] <-traceplot(scenario1[[i]] ,param = "N")} 
+
+#lapply(trace.list3k,function(x){ggsave(file=paste(x,"pdf",sep="."),get(x))})
+
+#c("p0.S", "N", "p0.O", "psi"))
+
+trace.list_S2 <- list()
+
+for(i in 1:length(scenario2)) {    
+  
+  trace.list_S2[[i]] <-traceplot(scenario2[[i]] ,param= "N")
+}
+
+trace.list_S3 <- list()
+
+for(i in 1:length(scenario2)) {    
+  
+  trace.list_S3[[i]] <-traceplot(scenario3[[i]] ,param= "N")
+}
+
+
+
+
 
 
 ### Columbian simulation plots ####
