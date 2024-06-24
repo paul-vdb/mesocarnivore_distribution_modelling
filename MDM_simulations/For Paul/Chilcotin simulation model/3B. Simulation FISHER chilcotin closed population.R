@@ -7,8 +7,11 @@
 #.libPaths('C:/Users/CHURTADO/AppData/R') # this is a new path
 #.libPaths('C:/Users/CHURTADO/AppData/Local/R/win-library/4.3') 
 
-setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/For Paul/Chilcotin simulation model")
+# setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations/For Paul/Chilcotin simulation model")
 start.time <- Sys.time()
+wd <- "C:/Users/vandambatesp/Documents/GitHub/mesocarnivore_distribution_modelling/MDM_simulations/For Paul/Chilcotin simulation model"
+setwd(wd)
+load("Chilcotin_simulation_data.Rdata")
 
 library(rjags)
 library(jagsUI)
@@ -38,8 +41,7 @@ for(i in 1:nsims){
   y <- obj.i$y.s # observed SCR data for first T
   dim.y <- dim(y)
   y.orig <- array(0L, c(dim.y[1] + 1, dim.y[2], dim.y[3]))
-  y.orig [1:nrow(y), , ] <-
-    y # observed data augmented only with 1 row
+  y.orig [1:nrow(y), , ] <- y # observed data augmented only with 1 row
   O <- obj.i$O.o[, , 1]
   X.s <- as.matrix(obj.i$X.s)
   X.o <- as.matrix(obj.i$X.o)
