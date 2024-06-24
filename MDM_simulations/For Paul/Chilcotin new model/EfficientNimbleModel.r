@@ -107,8 +107,7 @@ scr_occ_model <- nimbleCode({
 ## This model input has counts instead of binomials
 scr_count_model <- nimbleCode({
   psi ~ dbeta(1, 1)    # M*psi = E[N(1)]
-  p0.S ~ dbeta(1, 1)
-  p0.O ~ dbeta(1, 1)
+  lam ~ unif(0, 100)  ## removed p.O + p.S
   
   sigma ~ dgamma(6, 4) # followed burgar et. al. 2018 for calculations, 5 to 300km2
   N <- sum(z[])     # Number of females
@@ -127,12 +126,12 @@ scr_count_model <- nimbleCode({
     p.O[i, 1:J.o] <- calcTrapDetection_HN(distsSquared = d2.o[i,1:J.o], sigma = sigma, z = z[i])
     
     ## p0 goes in here as it didn't impact that other part.
-    y[i,1:J.s] ~ dTrapBinom(p = p.S[i,1:J.s], lam0 = p0.S, nocc = nocc.s[1:J.s], z= z[i], detfn = "hazardhalfnormal")
+    y[i,1:J.s] ~ dTrapBinom(p = p.S[i,1:J.s], lam0 = lam, nocc = nocc.s[1:J.s], z= z[i], detfn = "hazardhalfnormal")
   }#m
   
   ## This is Chandler and Royle 2013
   for(j in 1:J.o) { #for every trap
-      O[j] ~ dTrapPoisson_NoID(p = p.O[1:M, j], lam0 = p0.O, T = nocc.o[j], z = z[1:M]) 
+      O[j] ~ dTrapPoisson_NoID(p = p.O[1:M, j], lam0 = lam, T = nocc.o[j], z = z[1:M]) 
     }#j.o
   }#m
 )
