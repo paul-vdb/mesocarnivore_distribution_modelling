@@ -282,7 +282,7 @@ load_obj <- function(f)
 
 chilcotin_03 <- lapply(filelist_D03, load_obj)
 chilcotin_01 <- lapply(filelist_D01, load_obj)
-chilcotin_05 <- lapply(filelist_D01, load_obj)
+chilcotin_05 <- lapply(filelist_D05, load_obj)
 
 #2. Violin plots
 
