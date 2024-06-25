@@ -9,6 +9,9 @@
 # setwd("C:/LocalR/mesocarnivore_distribution_modelling/MDM_simulations")
 start.time <- Sys.time()
 
+library(nimble)
+nimbleOptions(allowNFinModel = TRUE)
+
 library(rjags)
 library(jagsUI)
 
@@ -47,8 +50,6 @@ O <- O.binom2# used to be O
 nobs <- sum(rowSums(y.binom) > 0)
 
 constants <- list(
-  X.s = as.matrix(X.s),
-  X.o = as.matrix(X.o),
   xlims = xlim,
   ylims = ylim,
   M = M,
@@ -64,8 +65,10 @@ data$y[1:nrow(y.orig),] <- y.orig
 data$O <- O
 data$z <- c(rep(1, nobs), rep(NA, M - nobs))
 
+fastSCR <- fastSCRFunction(M, xlim, ylim, dx = 2, dy = 2, traps_camera = X.o, traps_hair = X.s, maxdist = 10)
+
 ## Can be slow sometimes to build and compile the model:
-Rmodel <- nimbleModel(scr_occ_model, constants, data, inits = init_simple())
+Rmodel <- nimbleModel(scr_occ_model_maxdist, constants, data, inits = init_simple())
 #Rmodel <- nimbleModel(scr_count_model, constants, data, inits = init_simple()) ## Poisson version I mentioned.
 conf <- configureMCMC(Rmodel, control = list(adaptFactorExponent = 0.25)) ## Better default rw adapter factor (I think). 
 conf$setMonitors(pars)
