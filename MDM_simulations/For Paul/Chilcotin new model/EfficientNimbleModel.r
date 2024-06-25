@@ -1,28 +1,84 @@
 require(nimble)
 
-calcDistSquared <- nimbleFunction(
-  run = function(s = double(1), traps = double(2), z = double()){
+## Way more complicated new version:
+fastSCRFunction <- nimbleFunction(
+  setup = function(M, xlim, ylim, dx, dy, traps_camera, traps_hair, maxdist){
+    z_ <- numeric(M)
+    s_indx <- numeric(M)
+    sigma_ <- 1
+    lam0_id <- 0.1 
+    lam0_noid <- 0.1
+    
+    maxd2 <- maxdist^2
+    xgrd <- seq(xlim[1], xlim[2], by = dx)
+    nx <- length(xgrd)
+    ygrd <- seq(ylim[1], ylim[2], by = dy)
+    ny <- length(ygrd)
+
+    xrange <- diff(xlim)
+    yrange <- diff(ylim)
+
+    grd <- expand.grid(xgrd, ygrd)
+    grd.indx <- cbind(floor((grd[,1]-xlim[1])/xrange*nx) + 1 ,floor((grd[,2]-ylim[1])/yrange*ny) + 1)
+    
+    grd_hair <- t(apply(grd, 1, FUN = function(x){(x[1] - traps_hair[,1])^2 + (x[2] - traps_hair[,2])^2}))
+    grd_hair <- (grd_hair <= maxd2)*1
+
+    grd_camera <- t(apply(grd, 1, FUN = function(x){(x[1] - traps_camera[,1])^2 + (x[2] - traps_camera[,2])^2}))
+    grd_camera <- (grd_camera <= maxd2)*1
+
+    J_camera <- nrow(traps_camera)
+    J_hair <- nrow(traps_hair)
+  },
+  run = function(){},
+  calcGridCell = function(s = double(1), z = double(), id = double()){
+    returnType(double())
+    if(z == 0){
+      return(0)
+
+    cell <- c(floor((s[1]-xlim[1])/xrange*nx), floor((s[2]-ylim[1])/yrange*ny))
+    s_index[id] <<- cell[1] + (cell[2]-1)*nx  ## This is the order of expand.grid.
+    return(s_index[id])
+  },
+  calcDistSquared = function(s = double(1), device = character(0, "camera"), z = double(), sindex = double() device = double()){
     returnType(double(1))
-    if(z == 0)
-      return(numeric(value = 0, length = dim(traps)[1]))
-
-      dist2 <- (traps[,1] - s[1])^2 + (traps[,2] - s[2])^2
-      return(dist2)
-  }
-)
-
-calcTrapDetection_HN = nimbleFunction(
-  run = function(distsSquared = double(1), sigma = double(), z = double()){ #, detfn = character(0, default = "halfnormal")){
+      
+    if(device == "camera")
+      dist2 <- numeric(value = 0, length = J_camera)
+    else
+      dist2 <- numeric(value = 0, length = J_hair)
+    
+    if(z == 0) return(dist2)
+    
+    if(device == "camera"){
+      ind <- which(grd_camera[sindex, ] == 1)
+      dist2[ind] <- (traps_camera[ind,1] - s[1])^2 + (traps_camera[ind,2] - s[2])^2
+    }else{
+      ind <- which(grd_hair[sindex, ] == 1)
+      dist2[ind] <- (traps_hair[ind,1] - s[1])^2 + (traps_hair[ind,2] - s[2])^2    
+    }
+    return(dist2)
+  },
+  calcTrapDetection_HN = function(distsSquared = double(1), sigma = double(), z = double(), sindex = double(), device = character(0, default = "camera")){ #, detfn = character(0, default = "halfnormal")){
     returnType(double(1))
+    
+    if(device == "camera")
+      ans <- numeric(value = 0, length = J_camera)
+    else
+      ans <- numeric(value = 0, length = J_hair)
     if(z == 0)
-      return(numeric(value = 0, length = dim(distsSquared)[1]))
-    # if(detfn == "halfnormal")
-    return(exp(-0.5*distsSquared/sigma^2))
-  }
-)
-
-dTrapPoisson_NoID = nimbleFunction(
-  run = function(x = double(), p = double(1), lam0 = double(), T = double(), z = double(1), log = integer(0, default = 0)){ #, detfn = character(0, default = "halfnormal")){
+      return(ans)
+ 
+    if(device == "camera"){
+      ind <- which(grd_camera[sindex, ] == 1)
+      ans[ind] <- exp(-0.5*distsSquared[ans]/sigma^2)
+    }else{
+      ind <- which(grd_hair[sindex, ] == 1)
+      ans[ind] <- exp(-0.5*distsSquared[ans]/sigma^2)
+    }
+    return(ans)
+  },
+  dTrapPoisson_NoID = function(x = double(), p = double(1), lam0 = double(), T = double(), z = double(1), log = integer(0, default = 0)){ #, detfn = character(0, default = "halfnormal")){
     returnType(double())
     H <- lam0*sum(p[z == 1])
     ans <- x*log(T*H) - T*H
@@ -30,39 +86,36 @@ dTrapPoisson_NoID = nimbleFunction(
       return(ans)
     else
       return(exp(ans))
-  }
-)
-
-## Single trap across all animals distr function.
-dTrapBinom_NoID = nimbleFunction(
-  run = function(x = double(), p = double(1), lam0 = double(), z = double(1), 
-      nocc = double(), log = integer(0, default = 0)){
+  },
+  dTrapBinom_NoID = function(x = double(), p = double(1), lam0 = double(), z = double(1), 
+      nocc = double(), j = double(), sindices = double(1), log = integer(0, default = 0)){
     returnType(double())
-    logpmiss = sum(log(1-lam0*p[z==1]))
+    ind <- which(grd_camera[sindices[z==1],j] == 1)
+    miss <- 1-lam0*p[ind]
+    miss <- miss[miss > 0]
+    logpmiss = sum(log(miss))
     ans <- (nocc-x)*logpmiss + x*log(1-exp(logpmiss))
     if(log) 
       return(ans)
     else
       return(exp(ans))
-  }
-)
-
-dTrapBinom = nimbleFunction(
-  run = function(x = double(1), p = double(1), lam0 = double(), z = double(), 
+  },
+  dTrapBinom = function(x = double(1), p = double(1), lam0 = double(), z = double(), 
       nocc = double(1), detfn = double(0, default = 1), log = integer(0, default = 0)){ #, detfn = character(0, default = "halfnormal")){
     returnType(double())
     if(z == 0){
       ans <- 0
     }else{
+      ppos <- which(p > 0)  ## Setting detections far away as hard zeros.
       if(detfn == 1) ## "halfnormal"
-      pobs <- p*lam0
+      pobs <- p[ppos]*lam0
       if(detfn == 2) ## hazard halfnormal
         pobs <- 1-exp(-lam0*pobs)  ## This one is consistent with poisson halfnormal model.
         
       if(sum(x) == 0) {
-        ans <- sum(nocc*log(1-pobs))
+        ans <- sum(nocc[ppos]*log(1-pobs))
       }else{
-        ans <- sum( x*log(pobs) + (nocc-x)*log(1-pobs) )
+        ans <- sum( x[ppos]*log(pobs) + (nocc[ppos]-x[ppos])*log(1-pobs) )
       }
     }
     if(log) 
@@ -135,3 +188,79 @@ scr_count_model <- nimbleCode({
     }#j.o
   }#m
 )
+
+
+
+
+## ARCHIVE FOR LATER:
+# calcDistSquared <- nimbleFunction(
+  # run = function(s = double(1), traps = double(2), z = double()){
+    # returnType(double(1))
+    # if(z == 0)
+      # return(numeric(value = 0, length = dim(traps)[1]))
+
+      # dist2 <- (traps[,1] - s[1])^2 + (traps[,2] - s[2])^2
+      # return(dist2)
+  # }
+# )
+
+# calcTrapDetection_HN = nimbleFunction(
+  # run = function(distsSquared = double(1), sigma = double(), z = double()){ #, detfn = character(0, default = "halfnormal")){
+    # returnType(double(1))
+    # if(z == 0)
+      # return(numeric(value = 0, length = dim(distsSquared)[1]))
+    ## if(detfn == "halfnormal")
+    # return(exp(-0.5*distsSquared/sigma^2))
+  # }
+# )
+
+# dTrapPoisson_NoID = nimbleFunction(
+  # run = function(x = double(), p = double(1), lam0 = double(), T = double(), z = double(1), log = integer(0, default = 0)){ #, detfn = character(0, default = "halfnormal")){
+    # returnType(double())
+    # H <- lam0*sum(p[z == 1])
+    # ans <- x*log(T*H) - T*H
+    # if(log) 
+      # return(ans)
+    # else
+      # return(exp(ans))
+  # }
+# )
+
+# dTrapBinom_NoID = nimbleFunction(
+  # run = function(x = double(), p = double(1), lam0 = double(), z = double(1), 
+      # nocc = double(), log = integer(0, default = 0)){
+    # returnType(double())
+    # logpmiss = sum(log(1-lam0*p[z==1]))
+    # ans <- (nocc-x)*logpmiss + x*log(1-exp(logpmiss))
+    # if(log) 
+      # return(ans)
+    # else
+      # return(exp(ans))
+  # }
+# )
+
+# dTrapBinom = nimbleFunction(
+  # run = function(x = double(1), p = double(1), lam0 = double(), z = double(), 
+      # nocc = double(1), detfn = double(0, default = 1), log = integer(0, default = 0)){ #, detfn = character(0, default = "halfnormal")){
+    # returnType(double())
+    # if(z == 0){
+      # ans <- 0
+    # }else{
+      # ppos <- which(p > 0)
+      # if(detfn == 1) ## "halfnormal"
+      # pobs <- p[ppos]*lam0
+      # if(detfn == 2) ## hazard halfnormal
+        # pobs <- 1-exp(-lam0*pobs)  ## This one is consistent with poisson halfnormal model.
+        
+      # if(sum(x) == 0) {
+        # ans <- sum(nocc[ppos]*log(1-pobs))
+      # }else{
+        # ans <- sum( x[ppos]*log(pobs) + (nocc[ppos]-x[ppos])*log(1-pobs) )
+      # }
+    # }
+    # if(log) 
+      # return(ans)
+    # else
+      # return(exp(ans))
+  # }
+# )
