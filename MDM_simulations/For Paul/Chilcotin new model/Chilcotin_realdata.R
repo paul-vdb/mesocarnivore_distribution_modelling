@@ -19,6 +19,7 @@ stub <- "closed_model_chilcotin"
 
 load("Chilcotin_realdata.Rdata")
 source("EfficientNimbleModel.R")
+# source("EvenMoreEfficientNimbleModel.R  ## Played around with improving it...
 
 M <- 1500
 init_simple <- function() {
@@ -53,6 +54,7 @@ constants <- list(
   xlims = xlim,
   ylims = ylim,
   M = M,
+  ## Traps are no longer needed here.
   J.s = nrow(X.s), ## hair snag
   J.o = nrow(X.o),
   nocc.o = n.occ.o,
@@ -65,8 +67,9 @@ data$y[1:nrow(y.orig),] <- y.orig
 data$O <- O
 data$z <- c(rep(1, nobs), rep(NA, M - nobs))
 
-fastSCR <- fastSCRFunction(M, xlim, ylim, dx = 2, dy = 2, traps_camera = X.o, traps_hair = X.s, maxdist = 10)
-
+## Choose the max distance between traps based on the scale of xlim
+## Currently 12 km?
+fastSCR <- fastSCRFunction(M, xlim, ylim, dx = 2, dy = 2, traps_camera = X.o, traps_hair = X.s, maxdist = 12)
 ## Can be slow sometimes to build and compile the model:
 Rmodel <- nimbleModel(scr_occ_model_maxdist, constants, data, inits = init_simple())
 #Rmodel <- nimbleModel(scr_count_model, constants, data, inits = init_simple()) ## Poisson version I mentioned.
