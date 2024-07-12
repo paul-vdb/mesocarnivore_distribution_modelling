@@ -14,6 +14,7 @@ nimbleOptions(allowNFinModel = TRUE)
 
 library(rjags)
 library(jagsUI)
+library(sf)
 
 stub <- "closed_model_chilcotin"
 
@@ -49,6 +50,17 @@ y.orig <- array(0L, c(dim.y[1] + 1, dim.y[2]))
 y.orig [1:nrow(y), ] <-  y # observed data augmented only with 1 row
 O <- O.binom2# used to be O
 nobs <- sum(rowSums(y.binom) > 0)
+
+## Check out space:
+# plot(st_coordinates(DNA_columbian_3k))
+# X.cam <- data.frame(X.o)
+# traps <- rbind(st_as_sf(x=X.cam, coords = c("X1", "X2")),
+  # st_as_sf(x=data.frame(X.s), coords = c("X1", "X2")) )
+# tmp <- traps %>% 
+  # st_buffer(20) %>% 
+  # st_union()
+# plot(st_coordinates(tmp))
+# points(st_coordinates(traps), col = 'red')
 
 constants <- list(
   xlims = xlim,
@@ -89,7 +101,7 @@ Cmodel <- compileNimble(Rmodel)
 Cmcmc <- compileNimble(Rmcmc, project = Rmodel)
 
 ## Just run mcmc locally and see how it does.
-Cmcmc$run(niter = 100)
+Cmcmc$run(niter = 1000)
 mvSamples <- Cmcmc$mvSamples
 samples <- as.matrix(mvSamples)
 ## Can look at as an MCMC object. 

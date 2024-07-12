@@ -10,6 +10,8 @@ data{
       }} 
 }
 model{
+  Density ~ dunif(0, 100)
+  psi1 <-
   psi ~ dbeta(1,1)    # M*psi = E[N(1)]
   p0.S ~ dbeta(1,1)
   p0.O ~ dbeta(1,1)

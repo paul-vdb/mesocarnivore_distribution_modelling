@@ -1,0 +1,56 @@
+
+data{
+  for(i in 1:n){
+    for(j in 1:J.s){
+        y[i,j]<-y.orig[i,j]
+      }}
+  for(i in (n+1):M){
+    for(j in 1:J.s){
+        y[i,j]<-y.orig[n+1,j]
+      }} 
+}
+model{
+
+  ## Shared parameters
+  p0.S ~ dbeta(1,1)
+  p0.O ~ dbeta(1,1)
+  Density ~ dunif(0, 100)
+  sigma ~ dgamma(6, 4) # followed burgar et. al. 2018 for calculations, 5 to 300km2
+  sigma2sq <- 2*sigma^2 # reduce the number of times this is computed.
+  
+  ##For adding regions. Need state region variable. Density[region].
+  for(state in 1:nstates) { 
+    psi[state] <- Area[state]*Density/M[state] ## State Augmentation Parameters:
+    
+    for(i in 1:M[state]) {
+      z[i,state] ~ dbern(psi)
+
+      s[state, i, 1] ~ dunif(xlims[state, 1], xlims[state, 2])
+      s[state, i, 2] ~ dunif(ylims[state, 1], ylims[state, 2])
+
+      for(j in 1:J.s[state]) {
+        d2.s[state, i, j] <- (s[state, i,1]-X.s[state, j, 1])^2 + (s[state, i, 2]-X.s[state, j,2])^2
+        p.S[state, i, j] <- p0.S*exp(-d2.s[state, i, j] / sigma2sq)
+      }
+      for(j in 1:J.o[state]) {
+        d2.o[state, i, j] <- (s[state, i,1]-X.o[state, j, 1])^2 + (s[state, i, 2]-X.o[state, j, 2])^2
+        p.O[state, i, j] <- p0.O*exp(-d2.o[state, i, j] / sigma2sq)
+      }
+    }#m
+    for(j in 1:J.o[state]) { #for every trap
+        logpn[state, j] <- sum(log(1-p.O[state, 1:M1,j]*z[1:M[state], state])) ## Might be a bit more stable than a product for small values.
+        pn[state, j] <- 1-exp(logpn[state, j])
+        O[state, j] ~ dbinom(pn[state, j], nocc.o[state, j]) ## *** Make this binomial. provide nocc for each of these camera traps.
+      }#j.o
+    }#m
+  }
+  
+  ## Individual animals ID = ordered 1:nmax per state.
+  for( i in 1:nAnimals ){
+    for(j in 1:J.s[animal.state[i]]) {
+      y[i, j] ~ dbinom(p.S[animal.state[i], i, j]*z[i, animal.state[i]], nocc.s[animals.state[i],j]) ## *** Make this binomial.
+    }#j.s
+  }
+
+  N <- Density*StudyArea
+}
