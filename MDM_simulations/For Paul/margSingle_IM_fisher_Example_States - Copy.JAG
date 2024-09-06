@@ -1,0 +1,48 @@
+
+model{
+
+  ## Shared parameters
+  p0.s ~ dbeta(1,1)
+  p0.o ~ dbeta(1,1)
+  Density ~ dunif(0, 100)
+  sigma ~ dgamma(6, 4) # followed burgar et. al. 2018 for calculations, 5 to 300km2
+  sigma2sq <- 2*sigma^2 # reduce the number of times this is computed.
+  
+  ##For adding regions. Need state region variable. Density[region].
+  
+  ## Part I: Per animal and state detection probability
+  for(state in 1:nstates){
+    psi[state] <- Area[state]*Density/M[state] ## State Augmentation Parameters:
+
+    for(i in 1:M[state]){
+      z[i, state] ~ dbern(psi)
+
+      s[i, 1, state] ~ dunif(xlims[state, 1], xlims[state, 2])
+      s[i, 2, state] ~ dunif(ylims[state, 1], ylims[state, 2])
+
+      for(j in 1:J[state]){
+        d2[ i, j, state] <- (s[i, 1, state]-X[j, 1, state])^2 + (s[i, 2, state]-X[j, 2, state])^2 
+        ## Another variable (Trap Type = 1 or 2).
+        p.O[ i, j, state] <- ifelse( trapType[j, state] == 1, p0[trapType[j,state]]*exp(-d2[ i, j, state] / sigma2sq), 0)
+        p.S[ i, j, state] <- ifelse( trapType[j, state] == 2, p0[trapType[j,state]]*exp(-d2[ i, j, state] / sigma2sq), 0)
+      }
+    }
+    ## Generate probability of at least one detector per state.
+    for( j in 1:J[state] ) logpn[state, j] <- ifelse( trapType[j, state] == 1, sum(log(1-p.O[1:M[state], j, state]*z[1:M[state], state])), 0)
+
+    for(j in 1:J[state]) { #for every trap
+      pn[state, j] <- ifelse( trapType[j, state] == 1, 1-exp(logpn[state, j]), 0)
+      O[state, j] ~ dbinom(pn[state, j], nocc.o[state, j])
+    }    
+  }
+  ## Individual animals ID = ordered 1:nmax per state.
+  for( i in 1:nAnimals){
+    for(j in 1:J[animal.state[i]]) {
+      y[i, j] ~ dbinom(p.S[ i, j, animal.state[i]], nocc.s[animals.state[i], j])
+    }
+  }
+  ## Get estimate of N per state.
+  for( state  in 1:nstates ){
+    N[state] = sum(z[1:M[state], state])
+  }
+}
