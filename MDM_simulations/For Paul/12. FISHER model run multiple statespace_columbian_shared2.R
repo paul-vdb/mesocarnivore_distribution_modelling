@@ -95,10 +95,11 @@ pars <- c("N","psi","p0.S","p0.O","sigma","N", "Density")
     trapType= trapType,
     xlims = xlims,
     ylims = ylims,
-    nAnimals= nAnimals,
+    nAnimals= sum(nAnimals),
     NOCC= NOCC_num,# number of occasion per cameras
     animal.state = animal.state,
-    nstates= nstates
+    nstates= nstates,
+    Area = Area
   )
   out <-
     jags(

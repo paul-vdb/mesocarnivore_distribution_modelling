@@ -29,13 +29,12 @@ model{
     }
     ## Generate probability of at least one detector per state.
     for( j in 1:J[state]) {
-    
-    logpn[state, j] <- ifelse( trapType[j, state] == 1, sum(log(1-p.O[1:M[state], j, state]*z[1:M[state], state])), 0)
+      logpn[state, j] <- ifelse( trapType[j, state] == 1, sum(log(1-p.O[1:M[state], j, state]*z[1:M[state], state])), 0)
 
-    for(j in 1:J[state]) { #for every trap
-      pn[state, j] <- ifelse( trapType[j, state] == 1, 1-exp(logpn[state, j]), 0)
-      O[state, j] ~ dbinom(pn[state, j], NOCC[state, j])
-    }    
+      for(j in 1:J[state]) { #for every trap
+        pn[state, j] <- ifelse( trapType[j, state] == 1, 1-exp(logpn[state, j]), 0)
+        O[state, j] ~ dbinom(pn[state, j], NOCC[state, j])
+      }    
   }
   ## Individual animals ID = ordered 1:nmax per state.
   for( i in 1:nAnimals){
