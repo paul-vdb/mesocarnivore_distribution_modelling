@@ -39,7 +39,7 @@ model{
   ## Individual animals ID = ordered 1:nmax per state.
   for( i in 1:nAnimals){
     for(j in 1:J[animal.state[i]]) {
-      y[i, j] ~ dbinom(p.S[ i, j, animal.state[i]], NOCC[animals.state[i], j])
+      y[i, j] ~ dbinom((p.S[i,j, animal.state[i]]*z[i, state]), NOCC[animals.state[i], j])
     }
   }
   ## Get estimate of N per state.

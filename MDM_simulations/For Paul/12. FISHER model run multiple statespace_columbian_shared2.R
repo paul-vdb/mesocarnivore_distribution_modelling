@@ -33,7 +33,6 @@ library(abind)
 
 nstates <- length(Area.list)
 Area <- unlist(Area.list) # in km2
-
 M<-c(500, 500, 300, 500, 500, 300, 1500)
 
 init_simple <- function() {
@@ -87,7 +86,7 @@ pars <- c("N","psi","p0.S","p0.O","sigma","N", "Density")
   out.i <- paste("out.",  "_", sep = "")
 
   data <- list(
-    y= Y.s.binom_num,
+    y= Y.s.binom_num2,
     O = bin.o_num, 
     M = M,
     X= X, 
